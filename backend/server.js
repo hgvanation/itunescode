@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const Database = require('better-sqlite3');
+const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
@@ -10,49 +10,53 @@ app.use(express.json());
 app.use(cors());
 
 // ==========================================
-// 1. Khởi tạo Cơ sở dữ liệu SQLite
+// 1. Khởi tạo Kết nối PostgreSQL (Supabase)
 // ==========================================
-const db = new Database('database.db');
-// Bật chế độ WAL để tăng tốc độ ghi dữ liệu và tránh bị khóa file DB
-db.pragma('journal_mode = WAL');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-// Khởi tạo cấu trúc bảng
-db.exec(`
-  CREATE TABLE IF NOT EXISTS admins (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL
-  );
+// Khởi tạo bảng dữ liệu trên Cloud
+const initDb = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL
+      );
 
-  CREATE TABLE IF NOT EXISTS codes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT UNIQUE NOT NULL,
-    status TEXT DEFAULT 'AVAILABLE',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
+      CREATE TABLE IF NOT EXISTS codes (
+        id SERIAL PRIMARY KEY,
+        code VARCHAR(255) UNIQUE NOT NULL,
+        status VARCHAR(50) DEFAULT 'AVAILABLE',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
 
-  CREATE TABLE IF NOT EXISTS redemptions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code_id INTEGER UNIQUE NOT NULL,
-    recipient_identifier TEXT NOT NULL,
-    claimed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (code_id) REFERENCES codes (id)
-  );
-`);
+      CREATE TABLE IF NOT EXISTS redemptions (
+        id SERIAL PRIMARY KEY,
+        code_id INTEGER UNIQUE NOT NULL REFERENCES codes(id),
+        recipient_identifier VARCHAR(255) UNIQUE NOT NULL,
+        claimed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
 
-// Tạo tài khoản Admin mặc định
-const initAdmin = () => {
-  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
-  
-  const existingAdmin = db.prepare('SELECT * FROM admins WHERE username = ?').get(adminUsername);
-  if (!existingAdmin) {
-    const hash = bcrypt.hashSync(adminPassword, 10);
-    db.prepare('INSERT INTO admins (username, password_hash) VALUES (?, ?)').run(adminUsername, hash);
-    console.log(`[INIT] Đã tạo tài khoản Admin: ${adminUsername}`);
+    // Tạo tài khoản Admin mặc định nếu chưa có
+    const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
+
+    const existingAdmin = await pool.query('SELECT * FROM admins WHERE username = $1', [adminUsername]);
+    if (existingAdmin.rows.length === 0) {
+      const hash = bcrypt.hashSync(adminPassword, 10);
+      await pool.query('INSERT INTO admins (username, password_hash) VALUES ($1, $2)', [adminUsername, hash]);
+      console.log(`[INIT] Đã khởi tạo Admin: ${adminUsername}`);
+    }
+  } catch (err) {
+    console.error('[DATABASE ERROR]:', err);
   }
 };
-initAdmin();
+initDb();
 
 // Helper kiểm tra Email / Threads
 function isValidIdentifier(input) {
@@ -77,24 +81,12 @@ function authenticateAdmin(req, res, next) {
   });
 }
 
-// API Public: Lấy thống kê kho mã công khai
-app.get('/api/v1/public/stats', (req, res) => {
-  try {
-    const total = db.prepare('SELECT COUNT(*) as count FROM codes').get().count;
-    const available = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "AVAILABLE"').get().count;
-    const used = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "USED"').get().count;
+// ==========================================
+// 2. PUBLIC APIs
+// ==========================================
 
-    return res.json({
-      success: true,
-      stats: { total, available, used }
-    });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: 'Lỗi lấy thống kê!' });
-  }
-});
-
-// API Public: Khách vãng lai nhận mã
-app.post('/api/v1/claim-code', (req, res) => {
+// Khách nhận mã iTunes
+app.post('/api/v1/claim-code', async (req, res) => {
   const { identifier } = req.body;
 
   if (!identifier || !isValidIdentifier(identifier)) {
@@ -105,158 +97,174 @@ app.post('/api/v1/claim-code', (req, res) => {
   }
 
   const cleanIdentifier = identifier.trim();
-
-  const claimTransaction = db.transaction(() => {
-    const existingClaim = db.prepare('SELECT * FROM redemptions WHERE recipient_identifier = ?').get(cleanIdentifier);
-    if (existingClaim) {
-      const claimedCode = db.prepare('SELECT code FROM codes WHERE id = ?').get(existingClaim.code_id);
-      return { status: 'ALREADY_CLAIMED', code: claimedCode.code };
-    }
-
-    const availableCode = db.prepare('SELECT * FROM codes WHERE status = "AVAILABLE" LIMIT 1').get();
-    if (!availableCode) {
-      return { status: 'OUT_OF_STOCK' };
-    }
-
-    db.prepare('UPDATE codes SET status = "USED" WHERE id = ?').run(availableCode.id);
-    db.prepare('INSERT INTO redemptions (code_id, recipient_identifier) VALUES (?, ?)').run(availableCode.id, cleanIdentifier);
-
-    return { status: 'SUCCESS', code: availableCode.code };
-  });
+  const client = await pool.connect();
 
   try {
-    const result = claimTransaction();
+    await client.query('BEGIN');
 
-    if (result.status === 'ALREADY_CLAIMED') {
+    // 1. Kiểm tra xem người dùng đã từng lấy mã chưa
+    const existingClaim = await client.query(
+      `SELECT c.code FROM redemptions r JOIN codes c ON r.code_id = c.id WHERE r.recipient_identifier = $1`,
+      [cleanIdentifier]
+    );
+
+    if (existingClaim.rows.length > 0) {
+      await client.query('ROLLBACK');
       return res.status(400).json({
         success: false,
         message: 'Bạn đã nhận mã trước đó rồi!',
-        code: result.code
+        code: existingClaim.rows[0].code
       });
     }
 
-    if (result.status === 'OUT_OF_STOCK') {
+    // 2. Lấy 1 mã chưa dùng
+    const availableCode = await client.query(
+      `SELECT * FROM codes WHERE status = 'AVAILABLE' LIMIT 1 FOR UPDATE`
+    );
+
+    if (availableCode.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({
         success: false,
-        message: 'Rất tiếc, kho mã hiện tại đã hết! Vui lòng quay lại sau.'
+        message: 'Rất tiếc, kho mã hiện tại đã hết!'
       });
     }
+
+    const codeObj = availableCode.rows[0];
+
+    // 3. Cập nhật trạng thái & lưu lịch sử
+    await client.query(`UPDATE codes SET status = 'USED' WHERE id = $1`, [codeObj.id]);
+    await client.query(
+      `INSERT INTO redemptions (code_id, recipient_identifier) VALUES ($1, $2)`,
+      [codeObj.id, cleanIdentifier]
+    );
+
+    await client.query('COMMIT');
 
     return res.json({
       success: true,
       message: 'Nhận mã thành công!',
-      code: result.code
+      code: codeObj.code
     });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Lỗi nhận mã:', error);
     return res.status(500).json({ success: false, message: 'Lỗi hệ thống server!' });
+  } finally {
+    client.release();
   }
 });
 
-// Admin API: Đăng nhập
-app.post('/api/v1/admin/login', (req, res) => {
+// ==========================================
+// 3. ADMIN APIs
+// ==========================================
+
+// Đăng nhập Admin
+app.post('/api/v1/admin/login', async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
     return res.status(400).json({ success: false, message: 'Thiếu thông tin đăng nhập!' });
   }
 
-  const admin = db.prepare('SELECT * FROM admins WHERE username = ?').get(username);
-  if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
-    return res.status(401).json({ success: false, message: 'Tài khoản hoặc mật khẩu không đúng!' });
+  try {
+    const adminRes = await pool.query('SELECT * FROM admins WHERE username = $1', [username]);
+    const admin = adminRes.rows[0];
+
+    if (!admin || !bcrypt.compareSync(password, admin.password_hash)) {
+      return res.status(401).json({ success: false, message: 'Tài khoản hoặc mật khẩu không đúng!' });
+    }
+
+    const token = jwt.sign(
+      { id: admin.id, username: admin.username },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '24h' }
+    );
+
+    return res.json({
+      success: true,
+      message: 'Đăng nhập thành công!',
+      token
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Lỗi đăng nhập server!' });
   }
-
-  const token = jwt.sign(
-    { id: admin.id, username: admin.username },
-    process.env.JWT_SECRET || 'secret',
-    { expiresIn: '24h' }
-  );
-
-  return res.json({
-    success: true,
-    message: 'Đăng nhập thành công!',
-    token
-  });
 });
 
-// Admin API: Nạp mã mới
-app.post('/api/v1/admin/codes', authenticateAdmin, (req, res) => {
+// Nạp mã vào Kho
+app.post('/api/v1/admin/codes', authenticateAdmin, async (req, res) => {
   const { codes } = req.body;
 
   if (!Array.isArray(codes) || codes.length === 0) {
-    return res.status(400).json({ success: false, message: 'Mảng mã nhập vào không được rỗng!' });
+    return res.status(400).json({ success: false, message: 'Danh sách mã không được rỗng!' });
   }
 
-  const addedCodes = [];
-  const duplicateCodes = [];
+  let addedCount = 0;
+  let duplicateCount = 0;
 
-  const insertTransaction = db.transaction((codeList) => {
-    const insertStmt = db.prepare('INSERT INTO codes (code) VALUES (?)');
-    for (let rawCode of codeList) {
-      const cleanCode = String(rawCode).trim();
-      if (!cleanCode) continue;
+  for (let rawCode of codes) {
+    const cleanCode = String(rawCode).trim();
+    if (!cleanCode) continue;
 
-      try {
-        insertStmt.run(cleanCode);
-        addedCodes.push(cleanCode);
-      } catch (err) {
-        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-          duplicateCodes.push(cleanCode);
-        }
+    try {
+      await pool.query('INSERT INTO codes (code) VALUES ($1)', [cleanCode]);
+      addedCount++;
+    } catch (err) {
+      if (err.code === '23505') { // Mã lỗi lặp trùng trong PostgreSQL
+        duplicateCount++;
       }
     }
-  });
+  }
 
+  return res.json({
+    success: true,
+    message: `Thành công! Đã thêm ${addedCount} mã mới.`,
+    data: { addedCount, duplicateCount }
+  });
+});
+
+// Lấy danh sách kho mã & thống kê
+app.get('/api/v1/admin/codes', authenticateAdmin, async (req, res) => {
   try {
-    insertTransaction(codes);
+    const codesRes = await pool.query('SELECT * FROM codes ORDER BY created_at DESC');
+    const totalRes = await pool.query('SELECT COUNT(*) FROM codes');
+    const availRes = await pool.query("SELECT COUNT(*) FROM codes WHERE status = 'AVAILABLE'");
+    const usedRes = await pool.query("SELECT COUNT(*) FROM codes WHERE status = 'USED'");
+
     return res.json({
       success: true,
-      message: `Đã nhập thành công ${addedCodes.length} mã.`,
-      data: {
-        addedCount: addedCodes.length,
-        duplicateCount: duplicateCodes.length,
-        duplicates: duplicateCodes
-      }
+      stats: {
+        total: parseInt(totalRes.rows[0].count),
+        available: parseInt(availRes.rows[0].count),
+        used: parseInt(usedRes.rows[0].count)
+      },
+      data: codesRes.rows
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Lỗi khi ghi mã vào CSDL!' });
+    return res.status(500).json({ success: false, message: 'Lỗi lấy danh sách mã!' });
   }
 });
 
-// Admin API: Danh sách kho mã & Thống kê
-app.get('/api/v1/admin/codes', authenticateAdmin, (req, res) => {
-  const codes = db.prepare('SELECT * FROM codes ORDER BY created_at DESC').all();
-  const total = db.prepare('SELECT COUNT(*) as count FROM codes').get().count;
-  const available = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "AVAILABLE"').get().count;
-  const used = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "USED"').get().count;
+// Lịch sử nhận mã
+app.get('/api/v1/admin/history', authenticateAdmin, async (req, res) => {
+  try {
+    const historyRes = await pool.query(`
+      SELECT r.id, r.recipient_identifier, c.code, r.claimed_at
+      FROM redemptions r
+      JOIN codes c ON r.code_id = c.id
+      ORDER BY r.claimed_at DESC
+    `);
 
-  return res.json({
-    success: true,
-    stats: { total, available, used },
-    data: codes
-  });
-});
-
-// Admin API: Lịch sử nhận mã
-app.get('/api/v1/admin/history', authenticateAdmin, (req, res) => {
-  const history = db.prepare(`
-    SELECT 
-      r.id,
-      r.recipient_identifier,
-      c.code,
-      r.claimed_at
-    FROM redemptions r
-    JOIN codes c ON r.code_id = c.id
-    ORDER BY r.claimed_at DESC
-  `).all();
-
-  return res.json({
-    success: true,
-    data: history
-  });
+    return res.json({
+      success: true,
+      data: historyRes.rows
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Lỗi lấy lịch sử!' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server đang chạy tại port: ${PORT}`);
+  console.log(`Server đang chạy tại port ${PORT}`);
 });
