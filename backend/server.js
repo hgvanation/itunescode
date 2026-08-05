@@ -18,8 +18,10 @@ const pool = new Pool({
 });
 
 // Khởi tạo bảng dữ liệu trên Cloud
+// Khởi tạo bảng dữ liệu trên Supabase PostgreSQL
 const initDb = async () => {
   try {
+    // 1. Tạo các bảng nếu chưa có
     await pool.query(`
       CREATE TABLE IF NOT EXISTS admins (
         id SERIAL PRIMARY KEY,
@@ -42,20 +44,24 @@ const initDb = async () => {
       );
     `);
 
-    // Tạo tài khoản Admin mặc định nếu chưa có
+    // 2. Tạo tài khoản Admin mặc định
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
+    const hash = bcrypt.hashSync(adminPassword, 10);
 
-    const existingAdmin = await pool.query('SELECT * FROM admins WHERE username = $1', [adminUsername]);
-    if (existingAdmin.rows.length === 0) {
-      const hash = bcrypt.hashSync(adminPassword, 10);
-      await pool.query('INSERT INTO admins (username, password_hash) VALUES ($1, $2)', [adminUsername, hash]);
-      console.log(`[INIT] Đã khởi tạo Admin: ${adminUsername}`);
-    }
+    await pool.query(
+      `INSERT INTO admins (username, password_hash) 
+       VALUES ($1, $2) 
+       ON CONFLICT (username) DO NOTHING`,
+      [adminUsername, hash]
+    );
+
+    console.log(`[INIT] Khởi tạo hệ thống & Admin tài khoản: ${adminUsername}`);
   } catch (err) {
-    console.error('[DATABASE ERROR]:', err);
+    console.error('[DATABASE INIT ERROR]:', err);
   }
 };
+
 initDb();
 
 // Helper kiểm tra Email / Threads
