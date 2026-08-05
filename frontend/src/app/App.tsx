@@ -23,7 +23,7 @@ import vector5 from "./vector-5.svg";
 import vector6 from "./vector-6.svg";
 
 // ── CẤU HÌNH API BACKEND ────────────────────────────────────────────────────
-const API_BASE_URL = "http://localhost:3000/api/v1";
+const API_BASE_URL = "https://itunes-sangwon.onrender.com";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type AppView = "home" | "admin";
