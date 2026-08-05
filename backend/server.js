@@ -13,6 +13,8 @@ app.use(cors());
 // 1. Khởi tạo Cơ sở dữ liệu SQLite
 // ==========================================
 const db = new Database('database.db');
+// Bật chế độ WAL để tăng tốc độ ghi dữ liệu và tránh bị khóa file DB
+db.pragma('journal_mode = WAL');
 
 // Khởi tạo cấu trúc bảng
 db.exec(`
@@ -25,7 +27,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS codes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT UNIQUE NOT NULL,
-    status TEXT DEFAULT 'AVAILABLE', -- 'AVAILABLE' hoặc 'USED'
+    status TEXT DEFAULT 'AVAILABLE',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -38,7 +40,7 @@ db.exec(`
   );
 `);
 
-// Tạo tài khoản Admin mặc định nếu chưa tồn tại
+// Tạo tài khoản Admin mặc định
 const initAdmin = () => {
   const adminUsername = process.env.ADMIN_USERNAME || 'admin';
   const adminPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
@@ -47,25 +49,17 @@ const initAdmin = () => {
   if (!existingAdmin) {
     const hash = bcrypt.hashSync(adminPassword, 10);
     db.prepare('INSERT INTO admins (username, password_hash) VALUES (?, ?)').run(adminUsername, hash);
-    console.log(`[INIT] Da tao tài khoản Admin: ${adminUsername}`);
+    console.log(`[INIT] Đã tạo tài khoản Admin: ${adminUsername}`);
   }
 };
 initAdmin();
 
-// ==========================================
-// 2. Helper & Middleware
-// ==========================================
-
-// Kiểm tra định dạng Email hoặc Threads ID
+// Helper kiểm tra Email / Threads
 function isValidIdentifier(input) {
   if (!input || typeof input !== 'string') return false;
   const trimmed = input.trim();
-  
-  // Regex kiểm tra Email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  // Regex kiểm tra Threads Username (cho phép @ ở đầu, chữ, số, dấu chấm, gạch dưới, độ dài 1-30)
   const threadsRegex = /^@?[a-zA-Z0-9._]{1,30}$/;
-
   return emailRegex.test(trimmed) || threadsRegex.test(trimmed);
 }
 
@@ -83,14 +77,23 @@ function authenticateAdmin(req, res, next) {
   });
 }
 
-// ==========================================
-// 3. API cho Khách Vãng Lai (Public)
-// ==========================================
+// API Public: Lấy thống kê kho mã công khai
+app.get('/api/v1/public/stats', (req, res) => {
+  try {
+    const total = db.prepare('SELECT COUNT(*) as count FROM codes').get().count;
+    const available = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "AVAILABLE"').get().count;
+    const used = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "USED"').get().count;
 
-/**
- * POST /api/v1/claim-code
- * Body: { "identifier": "user@gmail.com" } hoặc { "identifier": "@threads_user" }
- */
+    return res.json({
+      success: true,
+      stats: { total, available, used }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Lỗi lấy thống kê!' });
+  }
+});
+
+// API Public: Khách vãng lai nhận mã
 app.post('/api/v1/claim-code', (req, res) => {
   const { identifier } = req.body;
 
@@ -103,25 +106,19 @@ app.post('/api/v1/claim-code', (req, res) => {
 
   const cleanIdentifier = identifier.trim();
 
-  // Sử dụng Database Transaction để tránh Race Condition khi cấp mã
   const claimTransaction = db.transaction(() => {
-    // 1. Kiểm tra xem người dùng này đã nhận mã trước đó chưa (Chống spam)
     const existingClaim = db.prepare('SELECT * FROM redemptions WHERE recipient_identifier = ?').get(cleanIdentifier);
     if (existingClaim) {
       const claimedCode = db.prepare('SELECT code FROM codes WHERE id = ?').get(existingClaim.code_id);
       return { status: 'ALREADY_CLAIMED', code: claimedCode.code };
     }
 
-    // 2. Tìm mã chưa sử dụng
     const availableCode = db.prepare('SELECT * FROM codes WHERE status = "AVAILABLE" LIMIT 1').get();
     if (!availableCode) {
       return { status: 'OUT_OF_STOCK' };
     }
 
-    // 3. Đánh dấu mã đã dùng
     db.prepare('UPDATE codes SET status = "USED" WHERE id = ?').run(availableCode.id);
-
-    // 4. Lưu lịch sử nhận mã
     db.prepare('INSERT INTO redemptions (code_id, recipient_identifier) VALUES (?, ?)').run(availableCode.id, cleanIdentifier);
 
     return { status: 'SUCCESS', code: availableCode.code };
@@ -156,14 +153,7 @@ app.post('/api/v1/claim-code', (req, res) => {
   }
 });
 
-// ==========================================
-// 4. API Quản Trị Viên (Admin)
-// ==========================================
-
-/**
- * POST /api/v1/admin/login
- * Body: { "username": "admin", "password": "adminpassword123" }
- */
+// Admin API: Đăng nhập
 app.post('/api/v1/admin/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -179,7 +169,7 @@ app.post('/api/v1/admin/login', (req, res) => {
   const token = jwt.sign(
     { id: admin.id, username: admin.username },
     process.env.JWT_SECRET || 'secret',
-    { expiresIn: '12h' }
+    { expiresIn: '24h' }
   );
 
   return res.json({
@@ -189,10 +179,7 @@ app.post('/api/v1/admin/login', (req, res) => {
   });
 });
 
-/**
- * POST /api/v1/admin/codes
- * Body: { "codes": ["CODE1", "CODE2", "CODE3"] }
- */
+// Admin API: Nạp mã mới
 app.post('/api/v1/admin/codes', authenticateAdmin, (req, res) => {
   const { codes } = req.body;
 
@@ -203,43 +190,42 @@ app.post('/api/v1/admin/codes', authenticateAdmin, (req, res) => {
   const addedCodes = [];
   const duplicateCodes = [];
 
-  const insertStmt = db.prepare('INSERT INTO codes (code) VALUES (?)');
+  const insertTransaction = db.transaction((codeList) => {
+    const insertStmt = db.prepare('INSERT INTO codes (code) VALUES (?)');
+    for (let rawCode of codeList) {
+      const cleanCode = String(rawCode).trim();
+      if (!cleanCode) continue;
 
-  for (let rawCode of codes) {
-    const cleanCode = String(rawCode).trim();
-    if (!cleanCode) continue;
-
-    try {
-      insertStmt.run(cleanCode);
-      addedCodes.push(cleanCode);
-    } catch (err) {
-      // Mã lỗi UNIQUE constraint trong SQLite
-      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-        duplicateCodes.push(cleanCode);
-      } else {
-        console.error('Lỗi thêm mã:', err);
+      try {
+        insertStmt.run(cleanCode);
+        addedCodes.push(cleanCode);
+      } catch (err) {
+        if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+          duplicateCodes.push(cleanCode);
+        }
       }
     }
-  }
-
-  return res.json({
-    success: true,
-    message: `Đã nhập thành công ${addedCodes.length} mã.`,
-    data: {
-      addedCount: addedCodes.length,
-      duplicateCount: duplicateCodes.length,
-      duplicates: duplicateCodes
-    }
   });
+
+  try {
+    insertTransaction(codes);
+    return res.json({
+      success: true,
+      message: `Đã nhập thành công ${addedCodes.length} mã.`,
+      data: {
+        addedCount: addedCodes.length,
+        duplicateCount: duplicateCodes.length,
+        duplicates: duplicateCodes
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Lỗi khi ghi mã vào CSDL!' });
+  }
 });
 
-/**
- * GET /api/v1/admin/codes
- * Lấy danh sách kho mã & tổng quan thống kê
- */
+// Admin API: Danh sách kho mã & Thống kê
 app.get('/api/v1/admin/codes', authenticateAdmin, (req, res) => {
   const codes = db.prepare('SELECT * FROM codes ORDER BY created_at DESC').all();
-  
   const total = db.prepare('SELECT COUNT(*) as count FROM codes').get().count;
   const available = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "AVAILABLE"').get().count;
   const used = db.prepare('SELECT COUNT(*) as count FROM codes WHERE status = "USED"').get().count;
@@ -251,10 +237,7 @@ app.get('/api/v1/admin/codes', authenticateAdmin, (req, res) => {
   });
 });
 
-/**
- * GET /api/v1/admin/history
- * Xem lịch sử nhận mã
- */
+// Admin API: Lịch sử nhận mã
 app.get('/api/v1/admin/history', authenticateAdmin, (req, res) => {
   const history = db.prepare(`
     SELECT 
@@ -273,8 +256,7 @@ app.get('/api/v1/admin/history', authenticateAdmin, (req, res) => {
   });
 });
 
-// Khởi chạy server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server dang chay tai port: http://localhost:${PORT}`);
+  console.log(`Server đang chạy tại port: ${PORT}`);
 });
