@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 // ── CẤU HÌNH API BACKEND ────────────────────────────────────────────────────
-const API_BASE_URL = "https://itunes-sangwon.onrender.com";
+const API_BASE_URL = "https://itunes-sangwon.onrender.com/api/v1";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type AppView = "home" | "admin";
