@@ -47,17 +47,17 @@ interface StatsData {
 const socialLinks = [
   {
     label: "Facebook",
-    href: "https://www.facebook.com/",
+    href: "https://www.facebook.com/uriwonvn",
     icon: <Facebook className="w-4 h-4 text-white" />,
   },
   {
     label: "Instagram",
-    href: "https://www.instagram.com/",
+    href: "https://www.instagram.com/uriwon.vn",
     icon: <Instagram className="w-4 h-4 text-white" />,
   },
   {
     label: "Threads",
-    href: "https://www.threads.net/",
+    href: "https://www.threads.com/@uriwon.vn",
     icon: <AtSign className="w-4 h-4 text-white" />,
   },
 ];
@@ -67,19 +67,18 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   const [email, setEmail] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const [claimedCode, setClaimedCode] = useState("");
-  const [stats, setStats] = useState<StatsData>({ total: 0, available: 0, used: 0 });
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Màn hình intro video (mặc định hiện, đúng 5 giây tự ẩn)
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
-    fetch(`${API_BASE_URL}/public/stats`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.stats) {
-          setStats(data.stats);
-        }
-      })
-      .catch(() => {});
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -125,14 +124,30 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const statisticsList = [
-    { value: (stats?.total || 0).toString(), label: "Tổng code", valueClassName: "text-[#e40f48]" },
-    { value: (stats?.available || 0).toString(), label: "Còn lại", valueClassName: "text-[#50899c]" },
-    { value: (stats?.used || 0).toString(), label: "Đã nhận", valueClassName: "text-[#474747]" },
-  ];
-
   return (
     <main className="w-full min-h-screen relative flex flex-col justify-between bg-black text-white [background:radial-gradient(50%_50%_at_34%_37%,rgba(80,137,156,0.28)_0%,rgba(80,137,156,0)_52%),radial-gradient(50%_50%_at_66%_63%,rgba(26,179,255,0.22)_0%,rgba(26,179,255,0)_52%),linear-gradient(180deg,#000_0%,rgba(0,0,0,0.8)_100%)]">
+      
+      {/* ── MÀN HÌNH INTRO VIDEO (5 GIÂY) ────────────────────────── */}
+      {showSplash && (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-500">
+          <video
+            src="/intro.mp4"
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full object-contain"
+          />
+
+          {/* Nút Bỏ qua */}
+          <button
+            onClick={() => setShowSplash(false)}
+            className="absolute top-4 right-4 z-10 px-4 py-1.5 rounded-full bg-black/60 border border-white/30 text-white text-xs hover:bg-white/20 transition-colors cursor-pointer"
+          >
+            Bỏ qua →
+          </button>
+        </div>
+      )}
+
       {/* Header Mobile & Desktop */}
       <header className="w-full h-20 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/50 backdrop-blur-md border-b border-white/10 z-20">
         <div className="flex items-center gap-2">
@@ -142,7 +157,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </div>
 
         <button
-          className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/50 text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/50 text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer"
           type="button"
           onClick={onAdminLogin}
         >
@@ -151,7 +166,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </button>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section (Đã loại bỏ hoàn toàn 3 ô thống kê) */}
       <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-xl mx-auto w-full z-10">
         <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
           <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
@@ -187,7 +202,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
           </div>
 
           <button
-            className="w-full py-3 rounded-full font-semibold text-sm shadow-lg bg-gradient-to-r from-[#50899c] to-[#006168] hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="w-full py-3 rounded-full font-semibold text-sm shadow-lg bg-gradient-to-r from-[#50899c] to-[#006168] hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
             type="submit"
             disabled={loading}
           >
@@ -210,7 +225,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="p-1.5 bg-sky-500/20 text-sky-300 rounded hover:bg-sky-500/40 transition-colors"
+                  className="p-1.5 bg-sky-500/20 text-sky-300 rounded hover:bg-sky-500/40 transition-colors cursor-pointer"
                 >
                   {copied ? <Check size={16} /> : <Copy size={16} />}
                 </button>
@@ -223,31 +238,14 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
             ‼️ Mỗi email/Threads ID chỉ được nhận một code iTunes duy nhất.
           </p>
         </form>
-
-        {/* Thống Kê */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full mt-6">
-          {statisticsList.map((statistic) => (
-            <div
-              className="flex flex-col items-center justify-center p-2.5 sm:p-3 bg-white/90 rounded-xl border border-pink-100 shadow-md backdrop-blur-sm"
-              key={statistic.label}
-            >
-              <span className={`${statistic.valueClassName} font-bold text-xl sm:text-2xl`}>
-                {statistic.value}
-              </span>
-              <span className="text-[11px] sm:text-xs text-slate-700 font-medium">
-                {statistic.label}
-              </span>
-            </div>
-          ))}
-        </div>
       </section>
 
-      {/* Footer Mobile & Desktop */}
+      {/* Footer Mobile & Desktop (Góc dưới bên trái đổi thành Text tùy chỉnh) */}
       <footer className="w-full py-4 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
-        <div className="flex items-center gap-2">
-          <div className="w-12 h-6 bg-[url(/image.png)] bg-contain bg-no-repeat bg-center" />
-          <span className="text-white font-bold text-xs">×</span>
-          <div className="w-16 h-10 bg-[url(/image-leospaze.png)] bg-contain bg-no-repeat bg-center" />
+        
+        {/* Dòng chữ tùy chỉnh góc dưới bên trái (Thay đổi nội dung chữ ở đây) */}
+        <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
+          <span>THAY_CHU_O_DAY</span>
         </div>
 
         <nav className="flex items-center gap-4">
@@ -305,7 +303,7 @@ function AdminLoginModal({ onClose, onSuccess }: { onClose: () => void; onSucces
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="w-full max-w-sm p-6 sm:p-8 bg-black/90 border border-[#50899c40] rounded-2xl relative text-white shadow-2xl">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer">
           <X size={18} />
         </button>
         <h2 className="text-xl font-bold mb-6 text-center">Đăng Nhập Admin</h2>
@@ -328,7 +326,7 @@ function AdminLoginModal({ onClose, onSuccess }: { onClose: () => void; onSucces
             <button
               type="button"
               onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer"
             >
               {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -337,7 +335,7 @@ function AdminLoginModal({ onClose, onSuccess }: { onClose: () => void; onSucces
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl font-semibold text-white text-sm bg-gradient-to-r from-cyan-600 to-teal-700 hover:opacity-90 transition-opacity"
+            className="w-full py-3 rounded-xl font-semibold text-white text-sm bg-gradient-to-r from-cyan-600 to-teal-700 hover:opacity-90 transition-opacity cursor-pointer"
           >
             {loading ? "Đang xử lý..." : "Đăng Nhập"}
           </button>
@@ -367,7 +365,7 @@ function AdminDashboard({ token, onLogout }: { token: string; onLogout: () => vo
               <button
                 key={item.id}
                 onClick={() => setSection(item.id as AdminSection)}
-                className={`flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm whitespace-nowrap transition-colors cursor-pointer ${
                   section === item.id ? "bg-sky-500/20 text-sky-400 border border-sky-500/30" : "text-slate-400 hover:bg-white/5"
                 }`}
               >
@@ -377,7 +375,7 @@ function AdminDashboard({ token, onLogout }: { token: string; onLogout: () => vo
             ))}
           </nav>
         </div>
-        <button onClick={onLogout} className="flex items-center gap-2 px-3 py-2 text-xs md:text-sm text-slate-400 hover:text-white transition-colors">
+        <button onClick={onLogout} className="flex items-center gap-2 px-3 py-2 text-xs md:text-sm text-slate-400 hover:text-white transition-colors cursor-pointer">
           <LogOut size={16} /> <span className="hidden sm:inline">Đăng Xuất</span>
         </button>
       </aside>
@@ -544,7 +542,7 @@ function ImportCodes({ token }: { token: string }) {
       />
       <button
         onClick={handleImport}
-        className="w-full py-3 bg-[#50899c] hover:opacity-90 text-white rounded-xl font-bold transition-opacity text-sm sm:text-base"
+        className="w-full py-3 bg-[#50899c] hover:opacity-90 text-white rounded-xl font-bold transition-opacity text-sm sm:text-base cursor-pointer"
       >
         Nạp Ngay
       </button>
