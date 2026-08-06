@@ -71,8 +71,9 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // FIX LỖI: Gọi đúng endpoint public/stats thay vì admin/codes
   useEffect(() => {
-    fetch(`${API_BASE_URL}/admin/codes`)
+    fetch(`${API_BASE_URL}/public/stats`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.stats) {
@@ -126,9 +127,9 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   };
 
   const statisticsList = [
-    { value: stats.total.toString(), label: "Tổng code", valueClassName: "text-[#e40f48]" },
-    { value: stats.available.toString(), label: "Còn lại", valueClassName: "text-[#50899c]" },
-    { value: stats.used.toString(), label: "Đã nhận", valueClassName: "text-[#474747]" },
+    { value: (stats?.total || 0).toString(), label: "Tổng code", valueClassName: "text-[#e40f48]" },
+    { value: (stats?.available || 0).toString(), label: "Còn lại", valueClassName: "text-[#50899c]" },
+    { value: (stats?.used || 0).toString(), label: "Đã nhận", valueClassName: "text-[#474747]" },
   ];
 
   return (
