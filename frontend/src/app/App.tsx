@@ -48,17 +48,17 @@ const socialLinks = [
   {
     label: "Facebook",
     href: "https://www.facebook.com/",
-    icon: <Facebook className="w-[17px] h-[17px] text-white" />,
+    icon: <Facebook className="w-4 h-4 text-white" />,
   },
   {
     label: "Instagram",
     href: "https://www.instagram.com/",
-    icon: <Instagram className="w-[17px] h-[17px] text-white" />,
+    icon: <Instagram className="w-4 h-4 text-white" />,
   },
   {
     label: "Threads",
     href: "https://www.threads.net/",
-    icon: <AtSign className="w-[17px] h-[17px] text-white" />,
+    icon: <AtSign className="w-4 h-4 text-white" />,
   },
 ];
 
@@ -71,7 +71,6 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // FIX LỖI: Gọi đúng endpoint public/stats thay vì admin/codes
   useEffect(() => {
     fetch(`${API_BASE_URL}/public/stats`)
       .then((res) => res.json())
@@ -133,178 +132,135 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   ];
 
   return (
-    <main className="[background:radial-gradient(50%_50%_at_34%_37%,rgba(80,137,156,0.28)_0%,rgba(80,137,156,0)_52%),radial-gradient(50%_50%_at_66%_63%,rgba(26,179,255,0.22)_0%,rgba(26,179,255,0)_52%),radial-gradient(50%_50%_at_50%_50%,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0)_60%),linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0)_100%),linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,1)_100%),linear-gradient(0deg,rgba(0,0,0,1)_0%,rgba(0,0,0,1)_100%),linear-gradient(0deg,rgba(255,255,255,1)_0%,rgba(255,255,255,1)_100%)] w-full min-w-[1440px] min-h-[1024px] relative">
-      <header className="flex w-[1440px] h-20 items-center justify-between px-[120px] py-0 absolute top-0 left-[calc(50.00%_-_720px)] bg-[#00000080] shadow-[0px_2px_4px_#00000040] backdrop-blur-[2px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(2px)_brightness(100%)]">
-        <div className="inline-flex items-center gap-2 relative flex-[0_0_auto]" aria-label="Uriwon và LeoSpaze">
-          <div className="relative w-[59px] h-8 bg-[url(/image-uriwon.png)] bg-cover bg-[50%_50%]" />
-          <div className="inline-flex items-start flex-[0_0_auto] flex-col relative" aria-hidden="true">
-            <div className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-Bold',Helvetica] font-bold text-white text-xs tracking-[0] leading-4 whitespace-nowrap">
-              ×
-            </div>
-          </div>
-          <div className="relative w-[79px] h-20 bg-[url(/image-leospaze-2.png)] bg-cover bg-[50%_50%]" />
+    <main className="w-full min-h-screen relative flex flex-col justify-between bg-black text-white [background:radial-gradient(50%_50%_at_34%_37%,rgba(80,137,156,0.28)_0%,rgba(80,137,156,0)_52%),radial-gradient(50%_50%_at_66%_63%,rgba(26,179,255,0.22)_0%,rgba(26,179,255,0)_52%),linear-gradient(180deg,#000_0%,rgba(0,0,0,0.8)_100%)]">
+      {/* Header Mobile & Desktop */}
+      <header className="w-full h-20 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/50 backdrop-blur-md border-b border-white/10 z-20">
+        <div className="flex items-center gap-2">
+          <div className="w-12 h-6 sm:w-14 sm:h-8 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
+          <span className="text-white font-bold text-xs">×</span>
+          <div className="w-16 h-12 sm:w-20 sm:h-16 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center" />
         </div>
 
         <button
-          className="all-unset box-border inline-flex items-center gap-1.5 px-4 py-2 relative flex-[0_0_auto] rounded-[20px] border-[0.73px] border-solid border-[#ffffff80] cursor-pointer hover:bg-white/10 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/50 text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors"
           type="button"
           onClick={onAdminLogin}
         >
-          <Lock className="w-3.5 h-3.5 text-white" />
-          <span className="inline-flex items-center flex-[0_0_auto] flex-col relative">
-            <span className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-Medium',Helvetica] font-medium text-white text-sm text-center tracking-[0] leading-5 whitespace-nowrap">
-              Đăng nhập Admin
-            </span>
-          </span>
+          <Lock className="w-3.5 h-3.5" />
+          <span>Đăng nhập Admin</span>
         </button>
       </header>
 
-      <section
-        className="inline-flex flex-col items-center gap-6 p-10 absolute top-[calc(50.00%_-_352px)] left-[calc(50.00%_-_332px)] rounded-xl backdrop-blur-[2px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(2px)_brightness(100%)]"
-        aria-labelledby="page-title"
-      >
-        <div className="flex items-start justify-center relative self-stretch w-full flex-[0_0_auto]">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 relative self-stretch flex-[0_0_auto] bg-[#50899c14] rounded-[24403200px] border-[0.73px] border-solid border-[#ffffff40] backdrop-blur-[2px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(2px)_brightness(100%)]">
-            <span className="relative w-fit [font-family:'Montserrat-SemiBold',Helvetica] font-semibold text-white text-xs tracking-[0.30px] leading-4 whitespace-nowrap">
-              🎵 iTunes Streaming Code
-            </span>
-          </div>
+      {/* Hero Section */}
+      <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-xl mx-auto w-full z-10">
+        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
+          <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
         </div>
 
-        <div className="flex flex-col items-center relative self-stretch w-full flex-[0_0_auto]">
-          <h1 id="page-title" className="inline-flex items-start justify-center gap-2.5 relative flex-[0_0_auto]">
-            <span className="relative w-[204px] mt-[-1.00px] [font-family:'Montserrat-Bold',Helvetica] font-bold text-white text-4xl tracking-[0] leading-[45px]">
-              Nhận code
-            </span>
-            <span className="relative w-fit mt-[-1.00px] bg-[linear-gradient(117deg,rgba(228,15,72,1)_0%,rgba(255,143,123,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'Montserrat-Bold',Helvetica] font-bold text-transparent text-4xl text-center tracking-[0] leading-[45px] whitespace-nowrap">
-              iTunes
-            </span>
-          </h1>
-          <div className="flex flex-col items-center pt-3 pb-0 px-0 relative self-stretch w-full flex-[0_0_auto]">
-            <p className="relative w-[482px] mt-[-1.00px] [font-family:'Montserrat-Regular',Helvetica] font-normal text-white text-base text-center tracking-[0] leading-6">
-              Nhập địa chỉ email hoặc Threads ID để nhận code iTunes đưa bài hát của ALD1 lên top 1 bảng xếp hạng!
-            </p>
-          </div>
-        </div>
+        <h1 className="text-2xl sm:text-4xl font-bold text-center mb-3">
+          Nhận code <span className="bg-gradient-to-r from-[#e40f48] to-[#ff8f7b] bg-clip-text text-transparent">iTunes</span>
+        </h1>
 
+        <p className="text-sm sm:text-base text-slate-300 text-center mb-6 max-w-md">
+          Nhập địa chỉ email hoặc Threads ID để nhận code iTunes đưa bài hát của ALD1 lên top 1 bảng xếp hạng!
+        </p>
+
+        {/* Form Nhận Code */}
         <form
-          className="inline-flex flex-col items-start p-10 relative flex-[0_0_auto] bg-[#000000cc] rounded-lg border-2 border-solid border-[#50899c33] shadow-[0px_1px_2px_-1px_#50899c66,0px_1px_3px_#50899c66] backdrop-blur-[2px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(2px)_brightness(100%)]"
+          className="w-full p-5 sm:p-8 bg-black/80 rounded-2xl border border-[#50899c33] shadow-xl backdrop-blur-md flex flex-col gap-4"
           onSubmit={handleSubmit}
         >
-          <div className="items-start gap-6 flex flex-col relative self-stretch w-full flex-[0_0_auto]">
-            <div className="inline-flex flex-col items-start relative flex-[0_0_auto]">
-              <div className="flex flex-col items-start pt-0 pb-2 px-0 relative self-stretch w-full flex-[0_0_auto]">
-                <label
-                  className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-Medium',Helvetica] font-medium text-white text-sm tracking-[0] leading-5 whitespace-nowrap"
-                  htmlFor="input-1"
-                >
-                  Email / Threads Username
-                </label>
-              </div>
-              <input
-                className="w-[500px] h-[47px] px-4 py-3 bg-white rounded-lg overflow-hidden border-[1.45px] border-solid border-[#50899c33] relative self-stretch [font-family:'Montserrat-Regular',Helvetica] font-normal text-[#1a0633] text-sm tracking-[0] leading-[normal] outline-none"
-                id="input-1"
-                name="email"
-                placeholder="email@example.com hoặc @threads_user"
-                type="text"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required={true}
-              />
-            </div>
-
-            <div className="flex flex-col items-start gap-4 relative self-stretch w-full flex-[0_0_auto]">
-              <button
-                className="all-unset box-border flex flex-col w-[500px] items-center justify-center px-0 py-3 relative flex-[0_0_auto] rounded-[100px] shadow-[0px_4px_20px_#18c2e04c] [background:radial-gradient(50%_50%_at_65%_45%,rgba(80,137,156,1)_0%,rgba(0,97,104,1)_100%)] cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50"
-                type="submit"
-                disabled={loading}
-              >
-                <span className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-SemiBold',Helvetica] font-semibold text-white text-sm text-center tracking-[0] leading-5 whitespace-nowrap">
-                  {loading ? "Đang xử lý..." : "Lấy Code Ngay →"}
-                </span>
-              </button>
-
-              {formStatus && (
-                <div className="w-full text-center text-xs font-medium text-amber-400">
-                  {formStatus}
-                </div>
-              )}
-
-              {claimedCode && (
-                <div className="w-full flex flex-col items-center gap-2 p-3 bg-white/10 rounded-lg border border-sky-300/40 mt-2">
-                  <span className="text-xs text-slate-300">Mã code của bạn:</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl font-mono font-bold text-sky-400 tracking-wider">
-                      {claimedCode}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleCopy}
-                      className="p-1.5 bg-sky-500/20 text-sky-300 rounded hover:bg-sky-500/40 transition-colors"
-                    >
-                      {copied ? <Check size={16} /> : <Copy size={16} />}
-                    </button>
-                  </div>
-                  {copied && <span className="text-[10px] text-emerald-400">✓ Đã sao chép!</span>}
-                </div>
-              )}
-
-              <div className="flex flex-col items-center relative self-stretch w-full flex-[0_0_auto]">
-                <p className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-Regular',Helvetica] font-normal text-[#e40f48] text-xs text-center tracking-[0] leading-4 whitespace-nowrap">
-                  ‼️ Mỗi email/Threads ID chỉ được nhận một code iTunes duy nhất.
-                </p>
-              </div>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs sm:text-sm font-medium text-slate-200" htmlFor="input-1">
+              Email / Threads Username
+            </label>
+            <input
+              className="w-full h-11 px-4 bg-white rounded-lg text-slate-900 text-sm outline-none focus:ring-2 focus:ring-[#50899c]"
+              id="input-1"
+              name="email"
+              placeholder="email@example.com hoặc @threads_user"
+              type="text"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required={true}
+            />
           </div>
+
+          <button
+            className="w-full py-3 rounded-full font-semibold text-sm shadow-lg bg-gradient-to-r from-[#50899c] to-[#006168] hover:opacity-90 transition-opacity disabled:opacity-50"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Đang xử lý..." : "Lấy Code Ngay →"}
+          </button>
+
+          {formStatus && (
+            <div className="w-full text-center text-xs font-medium text-amber-400">
+              {formStatus}
+            </div>
+          )}
+
+          {claimedCode && (
+            <div className="w-full flex flex-col items-center gap-2 p-3 bg-white/10 rounded-lg border border-sky-300/40">
+              <span className="text-xs text-slate-300">Mã code của bạn:</span>
+              <div className="flex items-center gap-3">
+                <span className="text-lg sm:text-xl font-mono font-bold text-sky-400 tracking-wider">
+                  {claimedCode}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="p-1.5 bg-sky-500/20 text-sky-300 rounded hover:bg-sky-500/40 transition-colors"
+                >
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                </button>
+              </div>
+              {copied && <span className="text-[10px] text-emerald-400">✓ Đã sao chép!</span>}
+            </div>
+          )}
+
+          <p className="text-[11px] sm:text-xs text-[#e40f48] text-center">
+            ‼️ Mỗi email/Threads ID chỉ được nhận một code iTunes duy nhất.
+          </p>
         </form>
 
-        <dl className="grid grid-cols-3 grid-rows-[75.45px] h-fit gap-[12px_22px]">
-          {statisticsList.map((statistic, index) => (
+        {/* Thống Kê */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full mt-6">
+          {statisticsList.map((statistic) => (
             <div
-              className={`col-[${index + 1}_/_${index + 2}] relative row-[1_/_2] w-[180px] h-[75px] flex flex-col items-center p-3 bg-[#ffffffe6] rounded-lg border-[0.73px] border-solid border-pink-100 shadow-[0px_1px_2px_-1px_#0000001a,0px_1px_3px_#0000001a] backdrop-blur-[2px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(2px)_brightness(100%)]`}
+              className="flex flex-col items-center justify-center p-2.5 sm:p-3 bg-white/90 rounded-xl border border-pink-100 shadow-md backdrop-blur-sm"
               key={statistic.label}
             >
-              <dd className={`${statistic.valueClassName} relative w-fit mt-[-1.00px] [font-family:'Montserrat-Bold',Helvetica] font-bold text-[32px] text-center tracking-[0] leading-8 whitespace-nowrap`}>
+              <span className={`${statistic.valueClassName} font-bold text-xl sm:text-2xl`}>
                 {statistic.value}
-              </dd>
-              <dt className="flex flex-col w-[115.88px] h-[18px] items-center pt-0.5 pb-0 px-0 relative">
-                <span className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-Regular',Helvetica] font-normal text-black text-sm text-center tracking-[0] leading-4 whitespace-nowrap">
-                  {statistic.label}
-                </span>
-              </dt>
+              </span>
+              <span className="text-[11px] sm:text-xs text-slate-700 font-medium">
+                {statistic.label}
+              </span>
             </div>
           ))}
-        </dl>
+        </div>
       </section>
 
-      <footer className="flex w-[1440px] h-20 items-center justify-between px-[120px] py-0 absolute top-[944px] left-[calc(50.00%_-_720px)] bg-[#50899c80] shadow-[0px_-2px_4px_#00000040] backdrop-blur-[2px] backdrop-brightness-[100%] [-webkit-backdrop-filter:blur(2px)_brightness(100%)]">
-        <div className="inline-flex items-center gap-2 relative flex-[0_0_auto]" aria-label="Uriwon và LeoSpaze">
-          <div className="relative w-[59px] h-8 bg-[url(/image.png)] bg-cover bg-[50%_50%]" />
-          <div className="inline-flex items-start flex-[0_0_auto] flex-col relative" aria-hidden="true">
-            <div className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-Bold',Helvetica] font-bold text-white text-xs tracking-[0] leading-4 whitespace-nowrap">
-              ×
-            </div>
-          </div>
-          <div className="relative w-[79px] h-20 bg-[url(/image-leospaze.png)] bg-cover bg-[50%_50%]" />
+      {/* Footer Mobile & Desktop */}
+      <footer className="w-full py-4 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
+        <div className="flex items-center gap-2">
+          <div className="w-12 h-6 bg-[url(/image.png)] bg-contain bg-no-repeat bg-center" />
+          <span className="text-white font-bold text-xs">×</span>
+          <div className="w-16 h-10 bg-[url(/image-leospaze.png)] bg-contain bg-no-repeat bg-center" />
         </div>
-        <nav className="inline-flex items-center gap-4 relative flex-[0_0_auto]" aria-label="Mạng xã hội">
+
+        <nav className="flex items-center gap-4">
           {socialLinks.map((socialLink) => (
             <a
-              className="inline-flex items-center gap-1.5 relative flex-[0_0_auto]"
+              className="flex items-center gap-1 text-xs text-white hover:underline"
               href={socialLink.href}
               key={socialLink.label}
               target="_blank"
               rel="noreferrer"
-              aria-label={socialLink.label}
             >
-              <span className="relative flex items-center justify-center w-[17px] h-[17px]" aria-hidden="true">
-                {socialLink.icon}
-              </span>
-              <span className="inline-flex items-start flex-[0_0_auto] flex-col relative">
-                <span className="relative w-fit mt-[-1.00px] [font-family:'Montserrat-Medium',Helvetica] font-medium text-white text-xs tracking-[0] leading-4 whitespace-nowrap">
-                  {socialLink.label}
-                </span>
-              </span>
+              {socialLink.icon}
+              <span>{socialLink.label}</span>
             </a>
           ))}
         </nav>
@@ -348,11 +304,11 @@ function AdminLoginModal({ onClose, onSuccess }: { onClose: () => void; onSucces
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-sm p-8 bg-[#000000eb] border border-[#50899c40] rounded-2xl relative text-white shadow-2xl">
+      <div className="w-full max-w-sm p-6 sm:p-8 bg-black/90 border border-[#50899c40] rounded-2xl relative text-white shadow-2xl">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">
           <X size={18} />
         </button>
-        <h2 className="text-xl font-bold mb-6 text-center text-white">Đăng Nhập Admin</h2>
+        <h2 className="text-xl font-bold mb-6 text-center">Đăng Nhập Admin</h2>
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <input
             type="text"
@@ -391,41 +347,42 @@ function AdminLoginModal({ onClose, onSuccess }: { onClose: () => void; onSucces
   );
 }
 
-// ── Admin Dashboard ───────────────────────────────────────────────────────────
+// ── Admin Dashboard (Responsive Layout) ────────────────────────────────────────
 function AdminDashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   const [section, setSection] = useState<AdminSection>("dashboard");
 
   return (
-    <div className="min-h-screen flex bg-slate-950 text-white">
-      <aside className="w-64 bg-slate-900 p-6 border-r border-slate-800 flex flex-col justify-between">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-white">
+      {/* Sidebar Mobile & Desktop */}
+      <aside className="w-full md:w-64 bg-slate-900 p-4 md:p-6 border-b md:border-b-0 md:border-r border-slate-800 flex flex-row md:flex-col justify-between items-center md:items-stretch">
         <div>
-          <h2 className="text-lg font-bold mb-6 text-sky-400">ADMIN PANEL</h2>
-          <nav className="flex flex-col gap-2">
+          <h2 className="text-base md:text-lg font-bold text-sky-400 hidden md:block md:mb-6">ADMIN PANEL</h2>
+          <nav className="flex md:flex-col gap-1 md:gap-2 overflow-x-auto">
             {[
               { id: "dashboard", label: "Bảng điều khiển", Icon: LayoutDashboard },
               { id: "inventory", label: "Kho Mã", Icon: Package },
-              { id: "distributed", label: "Lịch Sử Nhận Mã", Icon: CheckCircle2 },
-              { id: "import", label: "Nạp Kho Mã", Icon: Upload },
+              { id: "distributed", label: "Lịch Sử", Icon: CheckCircle2 },
+              { id: "import", label: "Nạp Mã", Icon: Upload },
             ].map((item) => (
               <button
                 key={item.id}
                 onClick={() => setSection(item.id as AdminSection)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${
+                className={`flex items-center gap-2 px-3 py-2 md:px-4 md:py-3 rounded-xl text-xs md:text-sm whitespace-nowrap transition-colors ${
                   section === item.id ? "bg-sky-500/20 text-sky-400 border border-sky-500/30" : "text-slate-400 hover:bg-white/5"
                 }`}
               >
-                <item.Icon size={17} />
-                {item.label}
+                <item.Icon size={16} />
+                <span>{item.label}</span>
               </button>
             ))}
           </nav>
         </div>
-        <button onClick={onLogout} className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors">
-          <LogOut size={17} /> Đăng Xuất
+        <button onClick={onLogout} className="flex items-center gap-2 px-3 py-2 text-xs md:text-sm text-slate-400 hover:text-white transition-colors">
+          <LogOut size={16} /> <span className="hidden sm:inline">Đăng Xuất</span>
         </button>
       </aside>
 
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 md:p-8 overflow-x-auto">
         {section === "dashboard" && <DashboardOverview token={token} />}
         {section === "inventory" && <CodeInventory token={token} />}
         {section === "distributed" && <DistributedCodes token={token} />}
@@ -435,7 +392,7 @@ function AdminDashboard({ token, onLogout }: { token: string; onLogout: () => vo
   );
 }
 
-// ── Admin Components Gọi API Thực Tế ─────────────────────────────────────────
+// ── Admin Sub-Components ─────────────────────────────────────────────────────
 function DashboardOverview({ token }: { token: string }) {
   const [stats, setStats] = useState<StatsData>({ total: 0, available: 0, used: 0 });
 
@@ -450,18 +407,18 @@ function DashboardOverview({ token }: { token: string }) {
   }, [token]);
 
   return (
-    <div className="grid grid-cols-3 gap-6">
-      <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-        <p className="text-slate-400 text-sm">Tổng Số Mã</p>
-        <p className="text-3xl font-bold text-white mt-2">{stats.total}</p>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+      <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p className="text-slate-400 text-xs md:text-sm">Tổng Số Mã</p>
+        <p className="text-2xl md:text-3xl font-bold text-white mt-1">{stats.total}</p>
       </div>
-      <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-        <p className="text-emerald-400 text-sm font-semibold">Mã Còn Tồn (Khả dụng)</p>
-        <p className="text-3xl font-bold text-emerald-400 mt-2">{stats.available}</p>
+      <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p className="text-emerald-400 text-xs md:text-sm font-semibold">Mã Còn Tồn (Khả dụng)</p>
+        <p className="text-2xl md:text-3xl font-bold text-emerald-400 mt-1">{stats.available}</p>
       </div>
-      <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-        <p className="text-[#50899c] text-sm font-semibold">Mã Đã Phân Phối</p>
-        <p className="text-3xl font-bold text-[#50899c] mt-2">{stats.used}</p>
+      <div className="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+        <p className="text-[#50899c] text-xs md:text-sm font-semibold">Mã Đã Phân Phối</p>
+        <p className="text-2xl md:text-3xl font-bold text-[#50899c] mt-1">{stats.used}</p>
       </div>
     </div>
   );
@@ -481,22 +438,22 @@ function CodeInventory({ token }: { token: string }) {
   }, [token]);
 
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
-      <table className="w-full text-left">
+    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
+      <table className="w-full text-left min-w-[400px]">
         <thead className="bg-slate-950 border-b border-slate-800">
           <tr>
-            <th className="p-4 text-xs text-slate-400 uppercase">ID</th>
-            <th className="p-4 text-xs text-slate-400 uppercase">Mã Code</th>
-            <th className="p-4 text-xs text-slate-400 uppercase">Trạng Thái</th>
+            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">ID</th>
+            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Mã Code</th>
+            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Trạng Thái</th>
           </tr>
         </thead>
         <tbody>
           {codes.map((c) => (
             <tr key={c.id} className="border-b border-slate-800/50">
-              <td className="p-4 text-sm text-slate-400">#{c.id}</td>
-              <td className="p-4 font-mono font-bold text-[#50899c]">{c.code}</td>
-              <td className="p-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${c.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}`}>
+              <td className="p-3 sm:p-4 text-xs sm:text-sm text-slate-400">#{c.id}</td>
+              <td className="p-3 sm:p-4 font-mono font-bold text-[#50899c] text-xs sm:text-sm">{c.code}</td>
+              <td className="p-3 sm:p-4">
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold ${c.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}`}>
                   {c.status === 'AVAILABLE' ? 'Khả dụng' : 'Đã dùng'}
                 </span>
               </td>
@@ -525,21 +482,21 @@ function DistributedCodes({ token }: { token: string }) {
   }, [token]);
 
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
-      <table className="w-full text-left">
+    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
+      <table className="w-full text-left min-w-[500px]">
         <thead className="bg-slate-950 border-b border-slate-800">
           <tr>
-            <th className="p-4 text-xs text-slate-400 uppercase">Mã Code</th>
-            <th className="p-4 text-xs text-slate-400 uppercase">Người Nhận</th>
-            <th className="p-4 text-xs text-slate-400 uppercase">Thời Gian Cấp</th>
+            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Mã Code</th>
+            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Người Nhận</th>
+            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Thời Gian Cấp</th>
           </tr>
         </thead>
         <tbody>
           {history.map((h) => (
             <tr key={h.id} className="border-b border-slate-800/50">
-              <td className="p-4 font-mono font-bold text-[#50899c]">{h.code}</td>
-              <td className="p-4 text-sm text-slate-300">{h.recipient_identifier}</td>
-              <td className="p-4 text-sm text-slate-500">{new Date(h.claimed_at).toLocaleString("vi-VN")}</td>
+              <td className="p-3 sm:p-4 font-mono font-bold text-[#50899c] text-xs sm:text-sm">{h.code}</td>
+              <td className="p-3 sm:p-4 text-xs sm:text-sm text-slate-300">{h.recipient_identifier}</td>
+              <td className="p-3 sm:p-4 text-xs sm:text-sm text-slate-500">{new Date(h.claimed_at).toLocaleString("vi-VN")}</td>
             </tr>
           ))}
           {history.length === 0 && (
@@ -577,8 +534,8 @@ function ImportCodes({ token }: { token: string }) {
   };
 
   return (
-    <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 max-w-xl">
-      <h3 className="font-bold mb-4 text-white">Nạp Mã Vào Kho</h3>
+    <div className="bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-800 max-w-xl w-full">
+      <h3 className="font-bold mb-4 text-white text-base sm:text-lg">Nạp Mã Vào Kho</h3>
       <textarea
         value={rawCodes}
         onChange={(e) => setRawCodes(e.target.value)}
@@ -587,11 +544,11 @@ function ImportCodes({ token }: { token: string }) {
       />
       <button
         onClick={handleImport}
-        className="w-full py-3 bg-[#50899c] hover:opacity-90 text-white rounded-xl font-bold transition-opacity"
+        className="w-full py-3 bg-[#50899c] hover:opacity-90 text-white rounded-xl font-bold transition-opacity text-sm sm:text-base"
       >
         Nạp Ngay
       </button>
-      {msg && <p className="mt-4 text-sm text-emerald-400 font-medium">{msg}</p>}
+      {msg && <p className="mt-4 text-xs sm:text-sm text-emerald-400 font-medium">{msg}</p>}
     </div>
   );
 }
