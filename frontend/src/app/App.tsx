@@ -160,8 +160,8 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
     <main 
   className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-no-repeat bg-cover"
   style={{
-    backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.45) 100%), url('/my-bg.jpg')`,
-    backgroundPosition: `center 20%`
+    backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.45) 100%), url('/my-bg.mp4')`,
+    backgroundPosition: `center 50%`
   }}
 >
       {/* ── MÀN HÌNH INTRO VIDEO (5 GIÂY) ────────────────────────── */}
