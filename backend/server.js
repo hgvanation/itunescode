@@ -96,23 +96,28 @@ app.get('/', (req, res) => {
 });
 
 // Thống kê mã công khai cho Frontend (SỬA LỖI 404/Kết nối Backend)
-app.get('/api/v1/public/stats', async (req, res) => {
+// Endpoint tự tạo Admin theo ý bạn
+app.get('/api/v1/public/create-admin', async (req, res) => {
   try {
-    const totalRes = await pool.query('SELECT COUNT(*) FROM codes');
-    const availRes = await pool.query("SELECT COUNT(*) FROM codes WHERE status = 'AVAILABLE'");
-    const usedRes = await pool.query("SELECT COUNT(*) FROM codes WHERE status = 'USED'");
+    const user = req.query.user || 'admin';
+    const pass = req.query.pass || '123456';
+    const hash = bcrypt.hashSync(pass, 10);
+
+    await pool.query(
+      `INSERT INTO admins (username, password_hash) 
+       VALUES ($1, $2) 
+       ON CONFLICT (username) DO UPDATE SET password_hash = $2`,
+      [user, hash]
+    );
 
     return res.json({
       success: true,
-      stats: {
-        total: parseInt(totalRes.rows[0].count),
-        available: parseInt(availRes.rows[0].count),
-        used: parseInt(usedRes.rows[0].count)
-      }
+      message: `Đã tạo/cập nhật tài khoản admin thành công!`,
+      username: user,
+      password: pass
     });
   } catch (err) {
-    console.error('[STATS ERROR]:', err); // In chi tiết lỗi ra Render Log
-    return res.status(500).json({ success: false, message: 'Lỗi lấy thống kê!', error: err.message });
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 
