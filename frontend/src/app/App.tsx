@@ -427,6 +427,7 @@ function DashboardOverview({ token }: { token: string }) {
 
 function CodeInventory({ token }: { token: string }) {
   const [codes, setCodes] = useState<CodeEntry[]>([]);
+  const [filterStatus, setFilterStatus] = useState<"ALL" | "AVAILABLE" | "USED">("ALL");
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/admin/codes`, {
@@ -438,33 +439,90 @@ function CodeInventory({ token }: { token: string }) {
       });
   }, [token]);
 
+  // Lọc danh sách mã theo trạng thái được chọn từ nút công tắc
+  const filteredCodes = codes.filter((c) => {
+    if (filterStatus === "AVAILABLE") return c.status === "AVAILABLE";
+    if (filterStatus === "USED") return c.status === "USED";
+    return true; // "ALL"
+  });
+
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
-      <table className="w-full text-left min-w-[400px]">
-        <thead className="bg-slate-950 border-b border-slate-800">
-          <tr>
-            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">ID</th>
-            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Mã Code</th>
-            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Trạng Thái</th>
-          </tr>
-        </thead>
-        <tbody>
-          {codes.map((c) => (
-            <tr key={c.id} className="border-b border-slate-800/50">
-              <td className="p-3 sm:p-4 text-xs sm:text-sm text-slate-400">#{c.id}</td>
-              <td className="p-3 sm:p-4 font-mono font-bold text-[#50899c] text-xs sm:text-sm">{c.code}</td>
-              <td className="p-3 sm:p-4">
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold ${c.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}`}>
-                  {c.status === 'AVAILABLE' ? 'Khả dụng' : 'Đã dùng'}
-                </span>
-              </td>
+    <div className="flex flex-col gap-4">
+      {/* Nút Công Tắc Lọc Trạng Thái */}
+      <div className="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+        <span className="text-sm font-semibold text-slate-300">Bộ lọc trạng thái:</span>
+        <div className="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button
+            onClick={() => setFilterStatus("ALL")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              filterStatus === "ALL"
+                ? "bg-slate-800 text-white shadow-sm"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Tất cả ({codes.length})
+          </button>
+          <button
+            onClick={() => setFilterStatus("AVAILABLE")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              filterStatus === "AVAILABLE"
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Khả dụng ({codes.filter((c) => c.status === "AVAILABLE").length})
+          </button>
+          <button
+            onClick={() => setFilterStatus("USED")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              filterStatus === "USED"
+                ? "bg-sky-500/20 text-sky-400 border border-sky-500/30 shadow-sm"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Đã dùng ({codes.filter((c) => c.status === "USED").length})
+          </button>
+        </div>
+      </div>
+
+      {/* Bảng Hiển Thị Mã Code */}
+      <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden">
+        <table className="w-full text-left">
+          <thead className="bg-slate-950 border-b border-slate-800">
+            <tr>
+              <th className="p-4 text-xs text-slate-400 uppercase">ID</th>
+              <th className="p-4 text-xs text-slate-400 uppercase">Mã Code</th>
+              <th className="p-4 text-xs text-slate-400 uppercase">Trạng Thái</th>
             </tr>
-          ))}
-          {codes.length === 0 && (
-            <tr><td colSpan={3} className="p-8 text-center text-slate-500">Kho mã rỗng</td></tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredCodes.map((c) => (
+              <tr key={c.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                <td className="p-4 text-sm text-slate-400">#{c.id}</td>
+                <td className="p-4 font-mono font-bold text-[#50899c]">{c.code}</td>
+                <td className="p-4">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      c.status === "AVAILABLE"
+                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        : "bg-slate-800 text-slate-400"
+                    }`}
+                  >
+                    {c.status === "AVAILABLE" ? "Khả dụng" : "Đã dùng"}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {filteredCodes.length === 0 && (
+              <tr>
+                <td colSpan={3} className="p-8 text-center text-slate-500">
+                  Không có mã nào phù hợp với bộ lọc này
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
