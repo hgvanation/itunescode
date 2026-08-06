@@ -157,12 +157,13 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   };
 
   return (
-    <main
-      className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.35) 100%), url('/my-bg.jpg')`,
-      }}
-    >
+    <main 
+  className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-no-repeat bg-cover"
+  style={{
+    backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.45) 100%), url('/my-bg.jpg')`,
+    backgroundPosition: `center 35%`
+  }}
+>
       {/* ── MÀN HÌNH INTRO VIDEO (5 GIÂY) ────────────────────────── */}
       {showSplash && (
         <div className="fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-500">
@@ -202,7 +203,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
       </header>
 
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-start pt-4 sm:pt-6 pb-12 px-4 max-w-xl mx-auto w-full z-10">
+      <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-xl mx-auto w-full z-10">
         <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
           <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
         </div>
