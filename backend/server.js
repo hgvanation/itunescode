@@ -152,6 +152,44 @@ app.post('/api/v1/claim-code', async (req, res) => {
         code: existingClaim.rows[0].code
       });
     }
+    // API: Xóa một mã code trong kho (Chỉ xóa được khi chưa ai nhận)
+app.delete('/api/v1/admin/codes/:id', verifyAdminToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM codes WHERE id = $1 AND status = $2 RETURNING *', [id, 'AVAILABLE']);
+    if (result.rowCount === 0) {
+      return res.status(400).json({ success: false, message: 'Không thể xóa mã đã được sử dụng hoặc không tồn tại!' });
+    }
+    res.json({ success: true, message: 'Xóa mã thành công!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Lỗi server khi xóa mã!' });
+  }
+});
+
+// API: Xóa lượt nhận mã (Redemption) để mở lại mã đó
+app.delete('/api/v1/admin/redemptions/:id', verifyAdminToken, async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Lấy code_id trước khi xóa
+    const redRes = await pool.query('SELECT code_id FROM redemptions WHERE id = $1', [id]);
+    if (redRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy lượt nhận này!' });
+    }
+    const codeId = redRes.rows[0].code_id;
+
+    // Xóa khỏi bảng redemptions
+    await pool.query('DELETE FROM redemptions WHERE id = $1', [id]);
+
+    // Cập nhật lại trạng thái code thành AVAILABLE
+    await pool.query("UPDATE codes SET status = 'AVAILABLE' WHERE id = $1", [codeId]);
+
+    res.json({ success: true, message: 'Xóa lượt nhận và khôi phục mã thành công!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Lỗi server khi xóa lượt nhận!' });
+  }
+});
 
     // 2. Lấy 1 mã chưa dùng
     const availableCode = await client.query(

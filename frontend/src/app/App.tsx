@@ -15,6 +15,7 @@ import {
   Facebook,
   Instagram,
   AtSign,
+  Trash2,
 } from "lucide-react";
 
 // ── CẤU HÌNH API BACKEND ────────────────────────────────────────────────────
@@ -81,13 +82,44 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
     return () => clearTimeout(timer);
   }, []);
 
+  // Hàm validate định dạng & độ dài ở Frontend
+  const validateInput = (input: string) => {
+    const trimmed = input.trim();
+    if (!trimmed) return "Vui lòng nhập Email hoặc Threads ID!";
+
+    // Kiểm tra cấu trúc Email
+    if (trimmed.includes("@") && trimmed.includes(".")) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmed)) {
+        return "Định dạng Email không hợp lệ!";
+      }
+      return null;
+    }
+
+    // Kiểm tra cấu trúc Threads Username
+    const cleanHandle = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+    if (cleanHandle.length < 2) {
+      return "Threads Username phải có ít nhất 2 ký tự!";
+    }
+    if (cleanHandle.length > 30) {
+      return "Threads Username không được dài quá 30 ký tự!";
+    }
+    const threadsRegex = /^[a-zA-Z0-9._]+$/;
+    if (!threadsRegex.test(cleanHandle)) {
+      return "Threads Username chứa ký tự không hợp lệ!";
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setFormStatus("");
     setClaimedCode("");
 
-    if (!email.trim()) {
-      setFormStatus("Vui lòng nhập địa chỉ email hoặc Threads ID.");
+    const errorMsg = validateInput(email);
+    if (errorMsg) {
+      setFormStatus(errorMsg);
       return;
     }
 
@@ -125,10 +157,10 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   };
 
   return (
-    <main 
+    <main
       className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.35) 100%), url('/my-bg.jpg')`
+        backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.35) 100%), url('/my-bg.jpg')`,
       }}
     >
       {/* ── MÀN HÌNH INTRO VIDEO (5 GIÂY) ────────────────────────── */}
@@ -142,7 +174,6 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
             className="w-full h-full object-contain"
           />
 
-          {/* Nút Bỏ qua */}
           <button
             onClick={() => setShowSplash(false)}
             className="absolute top-4 right-4 z-10 px-4 py-1.5 rounded-full bg-black/60 border border-white/30 text-white text-xs hover:bg-white/20 transition-colors cursor-pointer"
@@ -246,7 +277,6 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
       {/* Footer Mobile & Desktop */}
       <footer className="w-full py-4 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
-        
         <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
           <span>đời bố, bố quản </span>
         </div>
@@ -429,7 +459,7 @@ function CodeInventory({ token }: { token: string }) {
   const [codes, setCodes] = useState<CodeEntry[]>([]);
   const [filterStatus, setFilterStatus] = useState<"ALL" | "AVAILABLE" | "USED">("ALL");
 
-  useEffect(() => {
+  const fetchCodes = () => {
     fetch(`${API_BASE_URL}/admin/codes`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -437,24 +467,47 @@ function CodeInventory({ token }: { token: string }) {
       .then((data) => {
         if (data.success) setCodes(data.data || []);
       });
+  };
+
+  useEffect(() => {
+    fetchCodes();
   }, [token]);
 
-  // Lọc danh sách mã theo trạng thái được chọn từ nút công tắc
+  // Xóa mã code khỏi kho
+  const handleDeleteCode = async (id: number) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa mã này khỏi hệ thống?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/codes/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCodes((prev) => prev.filter((item) => item.id !== id));
+      } else {
+        alert(data.message || "Không thể xóa mã này!");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối tới máy chủ!");
+    }
+  };
+
   const filteredCodes = codes.filter((c) => {
     if (filterStatus === "AVAILABLE") return c.status === "AVAILABLE";
     if (filterStatus === "USED") return c.status === "USED";
-    return true; // "ALL"
+    return true;
   });
 
   return (
     <div className="flex flex-col gap-4">
       {/* Nút Công Tắc Lọc Trạng Thái */}
-      <div className="flex items-center justify-between bg-slate-900 p-4 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 p-4 rounded-2xl border border-slate-800">
         <span className="text-sm font-semibold text-slate-300">Bộ lọc trạng thái:</span>
-        <div className="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <div className="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 self-start sm:self-auto">
           <button
             onClick={() => setFilterStatus("ALL")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               filterStatus === "ALL"
                 ? "bg-slate-800 text-white shadow-sm"
                 : "text-slate-400 hover:text-white"
@@ -464,7 +517,7 @@ function CodeInventory({ token }: { token: string }) {
           </button>
           <button
             onClick={() => setFilterStatus("AVAILABLE")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               filterStatus === "AVAILABLE"
                 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm"
                 : "text-slate-400 hover:text-white"
@@ -474,7 +527,7 @@ function CodeInventory({ token }: { token: string }) {
           </button>
           <button
             onClick={() => setFilterStatus("USED")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               filterStatus === "USED"
                 ? "bg-sky-500/20 text-sky-400 border border-sky-500/30 shadow-sm"
                 : "text-slate-400 hover:text-white"
@@ -493,6 +546,7 @@ function CodeInventory({ token }: { token: string }) {
               <th className="p-4 text-xs text-slate-400 uppercase">ID</th>
               <th className="p-4 text-xs text-slate-400 uppercase">Mã Code</th>
               <th className="p-4 text-xs text-slate-400 uppercase">Trạng Thái</th>
+              <th className="p-4 text-xs text-slate-400 uppercase text-right">Hành Động</th>
             </tr>
           </thead>
           <tbody>
@@ -511,11 +565,23 @@ function CodeInventory({ token }: { token: string }) {
                     {c.status === "AVAILABLE" ? "Khả dụng" : "Đã dùng"}
                   </span>
                 </td>
+                <td className="p-4 text-right">
+                  {c.status === "AVAILABLE" && (
+                    <button
+                      onClick={() => handleDeleteCode(c.id)}
+                      className="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1 cursor-pointer"
+                      title="Xóa mã này"
+                    >
+                      <Trash2 size={14} />
+                      <span className="hidden sm:inline">Xóa</span>
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
             {filteredCodes.length === 0 && (
               <tr>
-                <td colSpan={3} className="p-8 text-center text-slate-500">
+                <td colSpan={4} className="p-8 text-center text-slate-500">
                   Không có mã nào phù hợp với bộ lọc này
                 </td>
               </tr>
@@ -530,7 +596,7 @@ function CodeInventory({ token }: { token: string }) {
 function DistributedCodes({ token }: { token: string }) {
   const [history, setHistory] = useState<DistributedEntry[]>([]);
 
-  useEffect(() => {
+  const fetchHistory = () => {
     fetch(`${API_BASE_URL}/admin/history`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -538,7 +604,31 @@ function DistributedCodes({ token }: { token: string }) {
       .then((data) => {
         if (data.success) setHistory(data.data || []);
       });
+  };
+
+  useEffect(() => {
+    fetchHistory();
   }, [token]);
+
+  // Xóa lượt nhận để giải phóng mã lại cho người khác
+  const handleDeleteRedemption = async (id: number) => {
+    if (!confirm("Xóa lượt nhận này sẽ giải phóng mã code về trạng thái 'Khả dụng'. Bạn có chắc chắn?")) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/redemptions/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHistory((prev) => prev.filter((item) => item.id !== id));
+      } else {
+        alert(data.message || "Không thể xóa lượt nhận!");
+      }
+    } catch (err) {
+      alert("Lỗi kết nối tới máy chủ!");
+    }
+  };
 
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto">
@@ -548,6 +638,7 @@ function DistributedCodes({ token }: { token: string }) {
             <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Mã Code</th>
             <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Người Nhận</th>
             <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase">Thời Gian Cấp</th>
+            <th className="p-3 sm:p-4 text-xs text-slate-400 uppercase text-right">Hành Động</th>
           </tr>
         </thead>
         <tbody>
@@ -556,10 +647,20 @@ function DistributedCodes({ token }: { token: string }) {
               <td className="p-3 sm:p-4 font-mono font-bold text-[#50899c] text-xs sm:text-sm">{h.code}</td>
               <td className="p-3 sm:p-4 text-xs sm:text-sm text-slate-300">{h.recipient_identifier}</td>
               <td className="p-3 sm:p-4 text-xs sm:text-sm text-slate-500">{new Date(h.claimed_at).toLocaleString("vi-VN")}</td>
+              <td className="p-3 sm:p-4 text-right">
+                <button
+                  onClick={() => handleDeleteRedemption(h.id)}
+                  className="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1 cursor-pointer"
+                  title="Xóa lượt nhận và hoàn lại code"
+                >
+                  <Trash2 size={14} />
+                  <span className="hidden sm:inline">Hủy lượt</span>
+                </button>
+              </td>
             </tr>
           ))}
           {history.length === 0 && (
-            <tr><td colSpan={3} className="p-8 text-center text-slate-500">Chưa có lịch sử cấp mã</td></tr>
+            <tr><td colSpan={4} className="p-8 text-center text-slate-500">Chưa có lịch sử cấp mã</td></tr>
           )}
         </tbody>
       </table>
