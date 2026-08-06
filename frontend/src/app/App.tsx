@@ -1,5 +1,4 @@
 import { useState, useEffect, FormEvent } from "react";
-import bgImage from "../../public/my-bg.jpg"; // Hoặc import bgImage from "/public/my-bg.jpg";
 import {
   LayoutDashboard,
   Package,
@@ -127,11 +126,22 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
   return (
     <main 
-  className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-cover bg-center bg-no-repeat"
-  style={{
-    backgroundImage: `url(${bgImage})`
-  }}
->
+      className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: "url('/my-bg.jpg')"
+      }}
+    >
+      {/* ── MÀN HÌNH INTRO VIDEO (5 GIÂY) ────────────────────────── */}
+      {showSplash && (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-500">
+          <video
+            src="/intro.mp4"
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full object-contain"
+          />
+
           {/* Nút Bỏ qua */}
           <button
             onClick={() => setShowSplash(false)}
@@ -160,7 +170,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </button>
       </header>
 
-      {/* Hero Section (Đã loại bỏ hoàn toàn 3 ô thống kê) */}
+      {/* Hero Section */}
       <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-xl mx-auto w-full z-10">
         <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
           <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
@@ -234,10 +244,9 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </form>
       </section>
 
-      {/* Footer Mobile & Desktop (Góc dưới bên trái đổi thành Text tùy chỉnh) */}
+      {/* Footer Mobile & Desktop */}
       <footer className="w-full py-4 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
         
-        {/* Dòng chữ tùy chỉnh góc dưới bên trái (Thay đổi nội dung chữ ở đây) */}
         <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
           <span>đời bố, bố quản </span>
         </div>
