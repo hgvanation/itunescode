@@ -128,10 +128,9 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
     <main 
   className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-cover bg-center bg-no-repeat"
   style={{
-    backgroundImage: "url('/my-bg.jpg')"
+    backgroundImage: `url('/my-bg.jpg')`
   }}
 >
-
           {/* Nút Bỏ qua */}
           <button
             onClick={() => setShowSplash(false)}
