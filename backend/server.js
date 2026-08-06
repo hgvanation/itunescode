@@ -17,7 +17,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Khởi tạo bảng dữ liệu trên Cloud
 // Khởi tạo bảng dữ liệu trên Supabase PostgreSQL
 const initDb = async () => {
   try {
@@ -46,7 +45,7 @@ const initDb = async () => {
 
     // 2. Tạo tài khoản Admin mặc định
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'adminpassword123';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'leesangwon123456789';
     const hash = bcrypt.hashSync(adminPassword, 10);
 
     await pool.query(
@@ -56,7 +55,7 @@ const initDb = async () => {
       [adminUsername, hash]
     );
 
-    console.log(`[INIT] Khởi tạo hệ thống & Admin tài khoản: ${adminUsername}`);
+    console.log(`[INIT] Khởi tạo hệ thành công & Admin tài khoản: ${adminUsername}`);
   } catch (err) {
     console.error('[DATABASE INIT ERROR]:', err);
   }
@@ -90,6 +89,31 @@ function authenticateAdmin(req, res, next) {
 // ==========================================
 // 2. PUBLIC APIs
 // ==========================================
+
+// Route kiểm tra trạng thái Server gốc (SỬA LỖI Cannot GET /)
+app.get('/', (req, res) => {
+  res.send('Server Node.js iTunes Code Distribution đang hoạt động bình thường!');
+});
+
+// Thống kê mã công khai cho Frontend (SỬA LỖI 404/Kết nối Backend)
+app.get('/api/v1/public/stats', async (req, res) => {
+  try {
+    const totalRes = await pool.query('SELECT COUNT(*) FROM codes');
+    const availRes = await pool.query("SELECT COUNT(*) FROM codes WHERE status = 'AVAILABLE'");
+    const usedRes = await pool.query("SELECT COUNT(*) FROM codes WHERE status = 'USED'");
+
+    return res.json({
+      success: true,
+      stats: {
+        total: parseInt(totalRes.rows[0].count),
+        available: parseInt(availRes.rows[0].count),
+        used: parseInt(usedRes.rows[0].count)
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Lỗi lấy thống kê!' });
+  }
+});
 
 // Khách nhận mã iTunes
 app.post('/api/v1/claim-code', async (req, res) => {
