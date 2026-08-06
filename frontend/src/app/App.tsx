@@ -245,7 +245,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         
         {/* Dòng chữ tùy chỉnh góc dưới bên trái (Thay đổi nội dung chữ ở đây) */}
         <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
-          <span>THAY_CHU_O_DAY</span>
+          <span>đời bố, bố quản </span>
         </div>
 
         <nav className="flex items-center gap-4">
