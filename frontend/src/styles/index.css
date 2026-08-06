@@ -1,18 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap');
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
 
 :root {
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 body {
-  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, button, .font-bold, .font-semibold {
-  font-family: 'Outfit', sans-serif !important;
+/* Các tiêu đề, logo, con số thống kê và nút bấm sẽ dùng font bay bổng */
+h1, h2, h3, .font-bold, .font-semibold, button {
+  font-family: 'Playfair Display', serif !important;
+  letter-spacing: 0.02em;
 }
