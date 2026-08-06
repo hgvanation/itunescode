@@ -71,17 +71,6 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Màn hình intro video (mặc định hiện, đúng 5 giây tự ẩn)
-  const [showSplash, setShowSplash] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   // Hàm validate định dạng & độ dài ở Frontend
   const validateInput = (input: string) => {
     const trimmed = input.trim();
@@ -157,35 +146,22 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   };
 
   return (
-    <main 
-  className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-no-repeat bg-cover"
-  style={{
-    backgroundImage: `linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.45) 100%), url('/my-bg.mp4')`,
-    backgroundPosition: `center 50%`
-  }}
->
-      {/* ── MÀN HÌNH INTRO VIDEO (5 GIÂY) ────────────────────────── */}
-      {showSplash && (
-        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center transition-opacity duration-500">
-          <video
-            src="/intro.mp4"
-            autoPlay
-            muted
-            playsInline
-            className="w-full h-full object-contain"
-          />
+    <main className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black overflow-hidden">
+      {/* ── VIDEO BACKGROUND LẶP LẠI (MY-BG.MP4) ───────────────────────── */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src="/my-bg.mp4"
+      />
 
-          <button
-            onClick={() => setShowSplash(false)}
-            className="absolute top-4 right-4 z-10 px-4 py-1.5 rounded-full bg-black/60 border border-white/30 text-white text-xs hover:bg-white/20 transition-colors cursor-pointer"
-          >
-            Bỏ qua →
-          </button>
-        </div>
-      )}
+      {/* Lớp phủ đen mờ làm dịu nền giúp chữ nổi bật hơn */}
+      <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none" />
 
       {/* Header Mobile & Desktop */}
-      <header className="w-full h-20 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/50 backdrop-blur-md border-b border-white/10 z-20">
+      <header className="w-full h-20 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
         <div className="flex items-center gap-2">
           <div className="w-12 h-6 sm:w-14 sm:h-8 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
           <span className="text-white font-bold text-xs">×</span>
@@ -203,22 +179,22 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
       </header>
 
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-xl mx-auto w-full z-10">
+      <section className="flex-1 flex flex-col items-center justify-start pt-4 sm:pt-6 pb-12 px-4 max-w-xl mx-auto w-full z-10">
         <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
           <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-bold text-center mb-3">
+        <h1 className="text-2xl sm:text-4xl font-bold text-center mb-3 drop-shadow-md">
           Nhận code <span className="bg-gradient-to-r from-[#e40f48] to-[#ff8f7b] bg-clip-text text-transparent">iTunes</span>
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-300 text-center mb-6 max-w-md">
+        <p className="text-sm sm:text-base text-slate-200 text-center mb-6 max-w-md drop-shadow">
           Nhập địa chỉ email hoặc Threads ID để nhận code iTunes đưa bài hát của ALD1 lên top 1 bảng xếp hạng!
         </p>
 
         {/* Form Nhận Code */}
         <form
-          className="w-full p-5 sm:p-8 bg-black/80 rounded-2xl border border-[#50899c33] shadow-xl backdrop-blur-md flex flex-col gap-4"
+          className="w-full p-5 sm:p-8 bg-black/80 rounded-2xl border border-[#50899c33] shadow-2xl backdrop-blur-md flex flex-col gap-4"
           onSubmit={handleSubmit}
         >
           <div className="flex flex-col gap-1.5">
@@ -270,7 +246,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
             </div>
           )}
 
-          <p className="text-[11px] sm:text-xs text-[#e40f48] text-center">
+          <p className="text-[11px] sm:text-xs text-[#e40f48] text-center font-medium">
             ‼️ Mỗi email/Threads ID chỉ được nhận một code iTunes duy nhất.
           </p>
         </form>
