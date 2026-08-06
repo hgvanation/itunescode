@@ -82,12 +82,10 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
     setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % bgVideos.length);
   };
 
-  // Hàm validate định dạng & độ dài ở Frontend
   const validateInput = (input: string) => {
     const trimmed = input.trim();
     if (!trimmed) return "Vui lòng nhập Email hoặc Threads ID!";
 
-    // Kiểm tra cấu trúc Email
     if (trimmed.includes("@") && trimmed.includes(".")) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(trimmed)) {
@@ -96,7 +94,6 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
       return null;
     }
 
-    // Kiểm tra cấu trúc Threads Username
     const cleanHandle = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
     if (cleanHandle.length < 2) {
       return "Threads Username phải có ít nhất 2 ký tự!";
@@ -157,61 +154,61 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   };
 
   return (
-    <main className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black overflow-hidden">
-      {/* ── VIDEO BACKGROUND PHÁT NỐI TIẾP & LẶP LẠI ────────────────── */}
+    <main className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black">
+      {/* ── VIDEO BACKGROUND PHÁT NỐI TIẾP & CỐ ĐỊNH FULL MÀN HÌNH ────────────────── */}
       <video
         key={bgVideos[currentVideoIndex]}
         autoPlay
         muted
         playsInline
         onEnded={handleVideoEnd}
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none"
         src={bgVideos[currentVideoIndex]}
       />
 
-      {/* Header Mobile & Desktop */}
-      <header className="w-full h-20 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
+      {/* Header Thu Nhỏ Chiều Cao (h-12) */}
+      <header className="w-full h-12 sm:h-14 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
         <div className="flex items-center gap-2">
-          <div className="w-12 h-6 sm:w-14 sm:h-8 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
+          <div className="w-10 h-5 sm:w-12 sm:h-6 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
           <span className="text-white font-bold text-xs">×</span>
-          <div className="w-16 h-12 sm:w-20 sm:h-16 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center" />
+          <div className="w-14 h-10 sm:w-16 sm:h-12 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center" />
         </div>
 
         <button
-          className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/50 text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-white/50 text-xs font-medium hover:bg-white/10 transition-colors cursor-pointer"
           type="button"
           onClick={onAdminLogin}
         >
-          <Lock className="w-3.5 h-3.5" />
+          <Lock className="w-3 h-3" />
           <span>Đăng nhập Admin</span>
         </button>
       </header>
 
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-start pt-4 sm:pt-6 pb-12 px-4 max-w-xl mx-auto w-full z-10">
-        <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
+      <section className="flex-1 flex flex-col items-center justify-center py-6 px-4 max-w-xl mx-auto w-full z-10 my-auto">
+        <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
           <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-bold text-center mb-3 drop-shadow-md">
+        <h1 className="text-2xl sm:text-4xl font-bold text-center mb-2 drop-shadow-md">
           Nhận code <span className="bg-gradient-to-r from-[#e40f48] to-[#ff8f7b] bg-clip-text text-transparent">iTunes</span>
         </h1>
 
-        <p className="text-sm sm:text-base text-slate-200 text-center mb-6 max-w-md drop-shadow">
+        <p className="text-xs sm:text-sm text-slate-200 text-center mb-5 max-w-md drop-shadow">
           Nhập địa chỉ email hoặc Threads ID để nhận code iTunes đưa bài hát của ALD1 lên top 1 bảng xếp hạng!
         </p>
 
         {/* Form Nhận Code */}
         <form
-          className="w-full p-5 sm:p-8 bg-black/80 rounded-2xl border border-[#50899c33] shadow-2xl backdrop-blur-md flex flex-col gap-4"
+          className="w-full p-4 sm:p-6 bg-black/80 rounded-2xl border border-[#50899c33] shadow-2xl backdrop-blur-md flex flex-col gap-3.5"
           onSubmit={handleSubmit}
         >
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-sm font-medium text-slate-200" htmlFor="input-1">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-slate-200" htmlFor="input-1">
               Email / Threads Username
             </label>
             <input
-              className="w-full h-11 px-4 bg-white rounded-lg text-slate-900 text-sm outline-none focus:ring-2 focus:ring-[#50899c]"
+              className="w-full h-10 px-4 bg-white rounded-lg text-slate-900 text-sm outline-none focus:ring-2 focus:ring-[#50899c]"
               id="input-1"
               name="email"
               placeholder="email@example.com hoặc @threads_user"
@@ -223,7 +220,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
           </div>
 
           <button
-            className="w-full py-3 rounded-full font-semibold text-sm shadow-lg bg-gradient-to-r from-[#50899c] to-[#006168] hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
+            className="w-full py-2.5 rounded-full font-semibold text-sm shadow-lg bg-gradient-to-r from-[#50899c] to-[#006168] hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
             type="submit"
             disabled={loading}
           >
@@ -237,7 +234,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
           )}
 
           {claimedCode && (
-            <div className="w-full flex flex-col items-center gap-2 p-3 bg-white/10 rounded-lg border border-sky-300/40">
+            <div className="w-full flex flex-col items-center gap-2 p-2.5 bg-white/10 rounded-lg border border-sky-300/40">
               <span className="text-xs text-slate-300">Mã code của bạn:</span>
               <div className="flex items-center gap-3">
                 <span className="text-lg sm:text-xl font-mono font-bold text-sky-400 tracking-wider">
@@ -255,14 +252,14 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
             </div>
           )}
 
-          <p className="text-[11px] sm:text-xs text-[#e40f48] text-center font-medium">
+          <p className="text-[11px] text-[#e40f48] text-center font-medium">
             ‼️ Mỗi email/Threads ID chỉ được nhận một code iTunes duy nhất.
           </p>
         </form>
       </section>
 
-      {/* Footer Mobile & Desktop */}
-      <footer className="w-full py-4 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
+      {/* Footer Thu Nhỏ Chiều Cao (py-2) */}
+      <footer className="w-full py-2 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-2 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
         <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
           <span>đời bố, bố quản </span>
         </div>
