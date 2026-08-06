@@ -128,12 +128,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
     <main 
   className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-cover bg-center bg-no-repeat"
   style={{
-    backgroundImage: `
-      radial-gradient(50% 50% at 34% 37%, rgba(80,137,156,0.15) 0%, rgba(80,137,156,0) 70%),
-      radial-gradient(50% 50% at 66% 63%, rgba(26,179,255,0.1) 0%, rgba(26,179,255,0) 70%),
-      linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%),
-      url('/my-bg.jpg')
-    `
+    backgroundImage: "url('/my-bg.jpg')"
   }}
 >
 
