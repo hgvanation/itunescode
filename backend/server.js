@@ -111,7 +111,8 @@ app.get('/api/v1/public/stats', async (req, res) => {
       }
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Lỗi lấy thống kê!' });
+    console.error('[STATS ERROR]:', err); // In chi tiết lỗi ra Render Log
+    return res.status(500).json({ success: false, message: 'Lỗi lấy thống kê!', error: err.message });
   }
 });
 
