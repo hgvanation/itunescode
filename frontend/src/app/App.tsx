@@ -21,6 +21,9 @@ import {
 // ── CẤU HÌNH API BACKEND ────────────────────────────────────────────────────
 const API_BASE_URL = "https://itunes-sangwon.onrender.com/api/v1";
 
+// Danh sách các video background chạy nối tiếp vòng tròn
+const bgVideos = ["/my-bg.mp4", "/intro.mp4"];
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 type AppView = "home" | "admin";
 type AdminSection = "dashboard" | "inventory" | "distributed" | "import";
@@ -70,6 +73,14 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   const [claimedCode, setClaimedCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // State quản lý chỉ số video đang phát
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+
+  // Chuyển sang video tiếp theo khi video hiện tại kết thúc
+  const handleVideoEnd = () => {
+    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % bgVideos.length);
+  };
 
   // Hàm validate định dạng & độ dài ở Frontend
   const validateInput = (input: string) => {
@@ -147,18 +158,16 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
   return (
     <main className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black overflow-hidden">
-      {/* ── VIDEO BACKGROUND LẶP LẠI (MY-BG.MP4) ───────────────────────── */}
+      {/* ── VIDEO BACKGROUND PHÁT NỐI TIẾP & LẶP LẠI ────────────────── */}
       <video
+        key={bgVideos[currentVideoIndex]}
         autoPlay
-        loop
         muted
         playsInline
+        onEnded={handleVideoEnd}
         className="absolute inset-0 w-full h-full object-cover z-0"
-        src="/my-bg.mp4"
+        src={bgVideos[currentVideoIndex]}
       />
-
-      {/* Lớp phủ đen mờ làm dịu nền giúp chữ nổi bật hơn */}
-      <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none" />
 
       {/* Header Mobile & Desktop */}
       <header className="w-full h-20 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
