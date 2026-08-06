@@ -202,7 +202,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
       </header>
 
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-xl mx-auto w-full z-10">
+      <section className="flex-1 flex flex-col items-center justify-start pt-4 sm:pt-6 pb-12 px-4 max-w-xl mx-auto w-full z-10">
         <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#50899c14] border border-white/20 backdrop-blur-sm">
           <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
         </div>
