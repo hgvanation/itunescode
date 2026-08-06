@@ -126,16 +126,16 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
   return (
     <main 
-      className="w-full min-h-screen relative flex flex-col justify-between text-white bg-cover bg-center bg-no-repeat"
-      style={{
-        background: `
-          radial-gradient(50% 50% at 34% 37%, rgba(80,137,156,0.28) 0%, rgba(80,137,156,0) 52%),
-          radial-gradient(50% 50% at 66% 63%, rgba(26,179,255,0.22) 0%, rgba(26,179,255,0) 52%),
-          linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.85) 100%),
-          url('/my-bg.jpg')
-        `
-      }}
-    >
+  className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black bg-cover bg-center bg-no-repeat"
+  style={{
+    backgroundImage: `
+      radial-gradient(50% 50% at 34% 37%, rgba(80,137,156,0.35) 0%, rgba(80,137,156,0) 60%),
+      radial-gradient(50% 50% at 66% 63%, rgba(26,179,255,0.28) 0%, rgba(26,179,255,0) 60%),
+      linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 100%),
+      url('/my-bg.jpg')
+    `
+  }}
+>
 
           {/* Nút Bỏ qua */}
           <button
