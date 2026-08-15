@@ -6,8 +6,10 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 
 const app = express();
+
+// Cấu hình CORS cho phép mọi Frontend (Vercel/Localhost) kết nối
+app.use(cors({ origin: '*' }));
 app.use(express.json());
-app.use(cors());
 
 // ==========================================
 // 1. Khởi tạo Kết nối PostgreSQL (Supabase)
@@ -20,7 +22,6 @@ const pool = new Pool({
 // Khởi tạo bảng dữ liệu trên Supabase PostgreSQL
 const initDb = async () => {
   try {
-    // 1. Tạo các bảng nếu chưa có
     await pool.query(`
       CREATE TABLE IF NOT EXISTS admins (
         id SERIAL PRIMARY KEY,
@@ -43,7 +44,6 @@ const initDb = async () => {
       );
     `);
 
-    // 2. Tạo tài khoản Admin mặc định
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = process.env.ADMIN_PASSWORD || 'leesangwon123456789';
     const hash = bcrypt.hashSync(adminPassword, 10);
@@ -55,7 +55,7 @@ const initDb = async () => {
       [adminUsername, hash]
     );
 
-    console.log(`[INIT] Khởi tạo hệ thành công & Admin tài khoản: ${adminUsername}`);
+    console.log(`[INIT] Khởi tạo thành công Admin: ${adminUsername}`);
   } catch (err) {
     console.error('[DATABASE INIT ERROR]:', err);
   }
@@ -72,7 +72,7 @@ function isValidIdentifier(input) {
   return emailRegex.test(trimmed) || threadsRegex.test(trimmed);
 }
 
-// Middleware xác thực Admin JWT
+// Middleware xác thực Admin JWT (Đã đặt đồng bộ tên authenticateAdmin)
 function authenticateAdmin(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -90,13 +90,12 @@ function authenticateAdmin(req, res, next) {
 // 2. PUBLIC APIs
 // ==========================================
 
-// Route kiểm tra trạng thái Server gốc (SỬA LỖI Cannot GET /)
+// Route kiểm tra trạng thái Server gốc
 app.get('/', (req, res) => {
   res.send('Server Node.js iTunes Code Distribution đang hoạt động bình thường!');
 });
 
-// Thống kê mã công khai cho Frontend (SỬA LỖI 404/Kết nối Backend)
-// Endpoint tự tạo Admin theo ý bạn
+// Endpoint tự tạo/cập nhật Admin khẩn cấp
 app.get('/api/v1/public/create-admin', async (req, res) => {
   try {
     const user = req.query.user || 'admin';
@@ -152,44 +151,6 @@ app.post('/api/v1/claim-code', async (req, res) => {
         code: existingClaim.rows[0].code
       });
     }
-    // API: Xóa một mã code trong kho (Chỉ xóa được khi chưa ai nhận)
-app.delete('/api/v1/admin/codes/:id', verifyAdminToken, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const result = await pool.query('DELETE FROM codes WHERE id = $1 AND status = $2 RETURNING *', [id, 'AVAILABLE']);
-    if (result.rowCount === 0) {
-      return res.status(400).json({ success: false, message: 'Không thể xóa mã đã được sử dụng hoặc không tồn tại!' });
-    }
-    res.json({ success: true, message: 'Xóa mã thành công!' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Lỗi server khi xóa mã!' });
-  }
-});
-
-// API: Xóa lượt nhận mã (Redemption) để mở lại mã đó
-app.delete('/api/v1/admin/redemptions/:id', verifyAdminToken, async (req, res) => {
-  const { id } = req.params;
-  try {
-    // Lấy code_id trước khi xóa
-    const redRes = await pool.query('SELECT code_id FROM redemptions WHERE id = $1', [id]);
-    if (redRes.rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'Không tìm thấy lượt nhận này!' });
-    }
-    const codeId = redRes.rows[0].code_id;
-
-    // Xóa khỏi bảng redemptions
-    await pool.query('DELETE FROM redemptions WHERE id = $1', [id]);
-
-    // Cập nhật lại trạng thái code thành AVAILABLE
-    await pool.query("UPDATE codes SET status = 'AVAILABLE' WHERE id = $1", [codeId]);
-
-    res.json({ success: true, message: 'Xóa lượt nhận và khôi phục mã thành công!' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Lỗi server khi xóa lượt nhận!' });
-  }
-});
 
     // 2. Lấy 1 mã chưa dùng
     const availableCode = await client.query(
@@ -284,7 +245,7 @@ app.post('/api/v1/admin/codes', authenticateAdmin, async (req, res) => {
       await pool.query('INSERT INTO codes (code) VALUES ($1)', [cleanCode]);
       addedCount++;
     } catch (err) {
-      if (err.code === '23505') { // Mã lỗi lặp trùng trong PostgreSQL
+      if (err.code === '23505') {
         duplicateCount++;
       }
     }
@@ -335,6 +296,41 @@ app.get('/api/v1/admin/history', authenticateAdmin, async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Lỗi lấy lịch sử!' });
+  }
+});
+
+// API: Xóa một mã code trong kho (Chỉ xóa được khi chưa ai nhận)
+app.delete('/api/v1/admin/codes/:id', authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('DELETE FROM codes WHERE id = $1 AND status = $2 RETURNING *', [id, 'AVAILABLE']);
+    if (result.rowCount === 0) {
+      return res.status(400).json({ success: false, message: 'Không thể xóa mã đã được sử dụng hoặc không tồn tại!' });
+    }
+    res.json({ success: true, message: 'Xóa mã thành công!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Lỗi server khi xóa mã!' });
+  }
+});
+
+// API: Xóa lượt nhận mã (Redemption) để mở lại mã đó
+app.delete('/api/v1/admin/redemptions/:id', authenticateAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const redRes = await pool.query('SELECT code_id FROM redemptions WHERE id = $1', [id]);
+    if (redRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy lượt nhận này!' });
+    }
+    const codeId = redRes.rows[0].code_id;
+
+    await pool.query('DELETE FROM redemptions WHERE id = $1', [id]);
+    await pool.query("UPDATE codes SET status = 'AVAILABLE' WHERE id = $1", [codeId]);
+
+    res.json({ success: true, message: 'Xóa lượt nhận và khôi phục mã thành công!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Lỗi server khi xóa lượt nhận!' });
   }
 });
 
