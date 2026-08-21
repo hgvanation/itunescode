@@ -309,7 +309,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
       {/* Footer Thu Nhỏ Chiều Cao (py-2) */}
       <footer className="w-full py-2 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-2 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
         <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
-          <span>đời bố, bố quản </span>
+          <span>Happy Birthday Leo ~ </span>
         </div>
 
         <nav className="flex items-center gap-4">
