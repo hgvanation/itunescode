@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, useRef, FormEvent } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -16,13 +16,12 @@ import {
   Instagram,
   AtSign,
   Trash2,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 // ── CẤU HÌNH API BACKEND ────────────────────────────────────────────────────
 const API_BASE_URL = "https://itunes-sangwon.onrender.com/api/v1";
-
-// Danh sách các video background chạy nối tiếp vòng tròn
-const bgVideos = ["/my-bg.mp4", "/intro.mp4"];
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type AppView = "home" | "admin";
@@ -74,13 +73,37 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // State quản lý chỉ số video đang phát
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  // State điều khiển nhạc
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // Chuyển sang video tiếp theo khi video hiện tại kết thúc
-  const handleVideoEnd = () => {
-    setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % bgVideos.length);
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
   };
+
+  // Hàm click vào màn hình tự bật nhạc (để lách luật chặn tự động phát của trình duyệt)
+  useEffect(() => {
+    const handleFirstClick = () => {
+      if (audioRef.current && !isPlaying) {
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(() => {
+          console.log("Trình duyệt chặn autoplay");
+        });
+      }
+      // Bỏ lắng nghe sau khi đã click lần đầu
+      document.removeEventListener('click', handleFirstClick);
+    };
+    document.addEventListener('click', handleFirstClick);
+    return () => document.removeEventListener('click', handleFirstClick);
+  }, [isPlaying]);
 
   const validateInput = (input: string) => {
     const trimmed = input.trim();
@@ -155,16 +178,29 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
   return (
     <main className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black">
-      {/* ── VIDEO BACKGROUND PHÁT NỐI TIẾP & CỐ ĐỊNH FULL MÀN HÌNH ────────────────── */}
+      {/* ── VIDEO BACKGROUND (Đã đổi thành 1 video loop) ────────────────── */}
       <video
-        key={bgVideos[currentVideoIndex]}
         autoPlay
+        loop
         muted
         playsInline
-        onEnded={handleVideoEnd}
         className="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none"
-        src={bgVideos[currentVideoIndex]}
+        src="/my-bg.mp4"
       />
+
+      {/* ── THẺ AUDIO VÀ NÚT BẬT/TẮT NHẠC ────────────────── */}
+      <audio ref={audioRef} src="/song.mp3" loop />
+      
+      <button
+        onClick={(e) => {
+          e.stopPropagation(); // Ngăn chặn nổi bọt sự kiện click (để không đụng chạm hàm auto-play ở trên)
+          toggleMusic();
+        }}
+        className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-50 p-3 bg-black/40 border border-white/20 rounded-full text-white hover:bg-white/20 backdrop-blur-md transition-all cursor-pointer shadow-lg"
+        title="Bật/Tắt nhạc nền"
+      >
+        {isPlaying ? <Volume2 size={20} className="text-sky-400" /> : <VolumeX size={20} className="text-slate-400" />}
+      </button>
 
       {/* Header Thu Nhỏ Chiều Cao (h-12) */}
       <header className="w-full h-12 sm:h-14 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
