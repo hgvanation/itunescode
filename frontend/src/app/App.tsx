@@ -179,13 +179,24 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
   return (
     <main className="w-full min-h-screen relative flex flex-col justify-between text-white bg-black">
-      {/* ── VIDEO BACKGROUND (Đã đổi thành 1 video loop) ────────────────── */}
+      
+      {/* ── VIDEO CHO ĐIỆN THOẠI (Chỉ hiện trên màn hình nhỏ) ── */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none"
+        className="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none md:hidden"
+        src="/phone_bg.mp4"
+      />
+
+      {/* ── VIDEO CHO LAPTOP (Chỉ hiện từ kích thước tablet/laptop trở lên) ── */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none hidden md:block"
         src="/my_bg.mp4"
       />
 
@@ -232,10 +243,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </h1>
 
         <p className="text-xs sm:text-sm text-slate-200 text-center mb-5 max-w-md drop-shadow">
-          💌 Nhập địa chỉ email hoặc Threads ID để nhận code iTunes và cùng nhau tạo nên món quà ý nghĩa dành tặng Leo!
-        </p>
-        <p className="text-sm sm:text-lg text-slate-200 text-center mb-5 max-w-md drop-shadow font-serif italic tracking-widest">
-            𝓛𝓞𝓥𝓔 𝓛𝓔𝓞 𝓣𝓔𝓝𝓓𝓔𝓡𝓛𝓨 ♡ 🎂🩵
+          Nhập địa chỉ email hoặc Threads ID để nhận code iTunes đưa bài hát của ALD1 lên top 1 bảng xếp hạng!
         </p>
 
         {/* Form Nhận Code */}
