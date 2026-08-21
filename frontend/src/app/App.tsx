@@ -234,8 +234,8 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         <p className="text-xs sm:text-sm text-slate-200 text-center mb-5 max-w-md drop-shadow">
           💌 Nhập địa chỉ email hoặc Threads ID để nhận code iTunes và cùng nhau tạo nên món quà ý nghĩa dành tặng Leo!
         </p>
-        <p className="text-xs sm:text-sm text-slate-200 text-center mb-5 max-w-md drop-shadow">
-              LOVE LEO, TENDERLY ♡ 🎂🩵
+        <p className="text-sm sm:text-lg text-slate-200 text-center mb-5 max-w-md drop-shadow font-serif italic tracking-widest">
+            𝓛𝓞𝓥𝓔 𝓛𝓔𝓞, 𝓣𝓔𝓝𝓓𝓔𝓡𝓛𝓨 ♡ 🎂🩵
         </p>
 
         {/* Form Nhận Code */}
