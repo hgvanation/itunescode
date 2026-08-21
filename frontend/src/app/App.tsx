@@ -238,11 +238,11 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
           <span className="text-xs font-semibold tracking-wide">🎵 iTunes Streaming Code</span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-bold text-center mb-2 drop-shadow-md">
-          Nhận code <span className="bg-gradient-to-r from-[#e40f48] to-[#ff8f7b] bg-clip-text text-transparent">iTunes</span>
+       <h1 className="text-2xl sm:text-4xl font-bold text-center mb-2 [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000,0_4px_10px_rgba(0,0,0,0.8)]">
+          Nhận code <span className="bg-gradient-to-r from-[#e40f48] to-[#ff8f7b] bg-clip-text text-transparent [text-shadow:none] drop-shadow-[0_1px_1.5px_rgba(0,0,0,1)]">iTunes</span>
         </h1>
 
-        <p className="text-xs sm:text-sm text-slate-200 text-center mb-5 max-w-md drop-shadow">
+        <p className="text-xs sm:text-sm text-white text-center mb-5 max-w-md font-semibold tracking-wide [text-shadow:-1px_-1px_0_#000,1px_-1px_0_#000,-1px_1px_0_#000,1px_1px_0_#000,0_2px_5px_rgba(0,0,0,0.9)]">
           Nhập địa chỉ email hoặc Threads ID để nhận code iTunes đưa bài hát của ALD1 lên top 1 bảng xếp hạng!
         </p>
 
