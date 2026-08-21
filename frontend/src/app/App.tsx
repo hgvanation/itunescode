@@ -197,7 +197,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         muted
         playsInline
         className="fixed inset-0 w-full h-full object-cover z-0 pointer-events-none hidden md:block"
-        src="/my_bg.mp4"
+        src="/my_bg.jpg"
       />
 
       {/* ── THẺ AUDIO VÀ NÚT BẬT/TẮT NHẠC ────────────────── */}
