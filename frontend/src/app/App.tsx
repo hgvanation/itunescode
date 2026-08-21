@@ -15,6 +15,7 @@ import {
   Facebook,
   Instagram,
   AtSign,
+  Twitter,
   Trash2,
   Volume2,
   VolumeX,
@@ -50,18 +51,18 @@ interface StatsData {
 const socialLinks = [
   {
     label: "Facebook",
-    href: "https://www.facebook.com/uriwonvn",
+    href: "https://www.facebook.com/profile.php?id=61589929732225",
     icon: <Facebook className="w-4 h-4 text-white" />,
   },
   {
-    label: "Instagram",
-    href: "https://www.instagram.com/uriwon.vn",
-    icon: <Instagram className="w-4 h-4 text-white" />,
+    label: "Threads",
+    href: "https://www.threads.com/@leospazevn",
+    icon: <AtSign className="w-4 h-4 text-white" />,
   },
   {
-    label: "Threads",
-    href: "https://www.threads.com/@uriwon.vn",
-    icon: <AtSign className="w-4 h-4 text-white" />,
+    label: "X",
+    href: "https://twitter.com/uriwonvn", // Đổi lại link X (Twitter) của bạn ở đây nhé
+    icon: <Twitter className="w-4 h-4 text-white" />,
   },
 ];
 
@@ -231,7 +232,10 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </h1>
 
         <p className="text-xs sm:text-sm text-slate-200 text-center mb-5 max-w-md drop-shadow">
-          Nhập địa chỉ email hoặc Threads ID để nhận code iTunes đưa bài hát của ALD1 lên top 1 bảng xếp hạng!
+          💌 Nhập địa chỉ email hoặc Threads ID để nhận code iTunes và cùng nhau tạo nên món quà ý nghĩa dành tặng Leo!
+        </p>
+        <p className="text-xs sm:text-sm text-slate-200 text-center mb-5 max-w-md drop-shadow">
+              LOVE LEO, TENDERLY ♡ 🎂🩵
         </p>
 
         {/* Form Nhận Code */}
