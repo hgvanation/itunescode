@@ -225,23 +225,26 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
       </button>
 
       {/* Header giữ nguyên chiều cao h-12/h-14 nhưng logo tràn ra ngoài cực ngầu */}
+      {/* Header giữ nguyên chiều cao h-12/h-14 */}
       <header className="w-full h-12 sm:h-14 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
         
-        {/* Cụm Logo - Đẩy scale lên 125% và thêm hiệu ứng drop-shadow phát sáng */}
-        <div className="flex items-center gap-6 sm:gap-8 scale-110 sm:scale-125 origin-left pl-2"> 
+        {/* Cụm Logo - Giảm gap xuống còn 2 hoặc 3 để kéo sát vào nhau */}
+        <div className="flex items-center gap-2 sm:gap-3 scale-110 sm:scale-125 origin-left pl-2"> 
           
           {/* LOGO URIWON (Glow trắng xanh) */}
           <div className="w-24 h-10 sm:w-28 sm:h-12 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           
-          {/* Dấu × nhỏ gọn ở giữa */}
-          <span className="text-white font-bold text-lg drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]">×</span>
+          {/* Dấu ✕ mảnh mai, sang trọng hơn (dùng ký tự đặc biệt) */}
+          <span className="text-white/70 font-light text-sm sm:text-base -mt-0.5 drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]">
+            ✕
+          </span>
           
           {/* LOGO LEO SPAZE (Glow trắng xanh) */}
           <div className="w-24 h-12 sm:w-28 sm:h-14 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           
         </div>
 
-        {/* Nút Admin giữ nguyên */}
+        {/* Nút Admin */}
         <button
           className="flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-white/50 text-xs font-medium hover:bg-white/10 transition-colors cursor-pointer"
           type="button"
