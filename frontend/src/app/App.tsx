@@ -48,21 +48,31 @@ interface StatsData {
   used: number;
 }
 
-const socialLinks = [
+// Link MXH của bên thứ nhất (Ví dụ: URIWON)
+const collab1Links = [
   {
     label: "Facebook",
-    href: "https://www.facebook.com/profile.php?id=61589929732225",
+    href: "https://www.facebook.com/uriwonvn",
+    icon: <Facebook className="w-4 h-4 text-white" />,
+  },
+   {
+    label: "Threads",
+    href: "https://www.threads.com/@uriwon.vn",
+    icon: <AtSign className="w-4 h-4 text-white" />,
+  },
+];
+
+// Link MXH của bên thứ hai (Ví dụ: LEO SPAZE)
+const collab2Links = [
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/profile.php?id=61589929732225", 
     icon: <Facebook className="w-4 h-4 text-white" />,
   },
   {
     label: "Threads",
     href: "https://www.threads.com/@leospazevn",
     icon: <AtSign className="w-4 h-4 text-white" />,
-  },
-  {
-    label: "X",
-    href: "https://twitter.com/uriwonvn", // Đổi lại link X (Twitter) của bạn ở đây nhé
-    icon: <Twitter className="w-4 h-4 text-white" />,
   },
 ];
 
@@ -306,26 +316,59 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </form>
       </section>
 
-      {/* Footer Thu Nhỏ Chiều Cao (py-2) */}
-      <footer className="w-full py-2 px-4 sm:px-12 md:px-24 flex flex-col sm:flex-row items-center justify-between gap-2 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
-        <div className="flex items-center gap-2 text-xs font-semibold text-white/80">
-          <span>Happy Birthday Leo ~ </span>
+      {/* Footer Collab 2 Bên */}
+      <footer className="w-full py-3 px-4 sm:px-12 md:px-24 flex flex-col xl:flex-row items-center justify-between gap-4 bg-[#50899c80] border-t border-white/10 backdrop-blur-md z-20">
+        <div className="flex items-center gap-2 text-xs font-semibold text-white/80 whitespace-nowrap">
+          <span>đời bố, bố quản</span>
         </div>
 
-        <nav className="flex items-center gap-4">
-          {socialLinks.map((socialLink) => (
-            <a
-              className="flex items-center gap-1 text-xs text-white hover:underline"
-              href={socialLink.href}
-              key={socialLink.label}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {socialLink.icon}
-              <span>{socialLink.label}</span>
-            </a>
-          ))}
-        </nav>
+        {/* Khu vực mạng xã hội Collab */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
+          
+          {/* Bên 1: URIWON */}
+          <div className="flex items-center gap-3 bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
+            <span className="text-[10px] font-bold text-sky-200 uppercase tracking-widest">URIWON</span>
+            <div className="w-px h-3 bg-white/20"></div>
+            <nav className="flex items-center gap-3">
+              {collab1Links.map((link) => (
+                <a
+                  className="flex items-center gap-1 text-xs text-white hover:text-sky-300 transition-colors"
+                  href={link.href}
+                  key={link.label}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={link.label}
+                >
+                  {link.icon}
+                </a>
+              ))}
+            </nav>
+          </div>
+
+          {/* Dấu x ở giữa (chỉ hiện trên màn hình lớn) */}
+          <span className="hidden sm:block text-white/50 text-xs font-bold px-2">×</span>
+
+          {/* Bên 2: LEO SPAZE */}
+          <div className="flex items-center gap-3 bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
+            <span className="text-[10px] font-bold text-teal-200 uppercase tracking-widest">LEO SPAZE</span>
+            <div className="w-px h-3 bg-white/20"></div>
+            <nav className="flex items-center gap-3">
+              {collab2Links.map((link) => (
+                <a
+                  className="flex items-center gap-1 text-xs text-white hover:text-teal-300 transition-colors"
+                  href={link.href}
+                  key={link.label}
+                  target="_blank"
+                  rel="noreferrer"
+                  title={link.label}
+                >
+                  {link.icon}
+                </a>
+              ))}
+            </nav>
+          </div>
+
+        </div>
       </footer>
     </main>
   );
