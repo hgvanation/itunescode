@@ -350,7 +350,7 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
           {/* Bên 2: LEO SPAZE */}
           <div className="flex items-center gap-3 bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
-            <span className="text-[10px] font-bold text-teal-200 uppercase tracking-widest">LEO SPAZE</span>
+            <span className="text-[10px] font-bold text-teal-200 uppercase tracking-widest">LEOSPAZE</span>
             <div className="w-px h-3 bg-white/20"></div>
             <nav className="flex items-center gap-3">
               {collab2Links.map((link) => (
