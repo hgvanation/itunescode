@@ -224,21 +224,24 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         {isPlaying ? <Volume2 size={20} className="text-sky-400" /> : <VolumeX size={20} className="text-slate-400" />}
       </button>
 
-      {/* Header Thu Nhỏ Chiều Cao (h-12) */}
+      {/* Header giữ nguyên chiều cao h-12/h-14 nhưng logo tràn ra ngoài cực ngầu */}
       <header className="w-full h-12 sm:h-14 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
-        <div className="flex items-center gap-3"> {/* Tăng gap lên xíu cho thoáng */}
+        
+        {/* Cụm Logo - Đẩy scale lên 125% và thêm hiệu ứng drop-shadow phát sáng */}
+        <div className="flex items-center gap-6 sm:gap-8 scale-110 sm:scale-125 origin-left pl-2"> 
           
-          {/* LOGO URIWON (Đã được làm to lên) */}
-          {/* LOGO URIWON (Đã tăng size to hẳn) */}
-          <div className="w-24 h-10 sm:w-32 sm:h-14 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
+          {/* LOGO URIWON (Glow trắng xanh) */}
+          <div className="w-24 h-10 sm:w-28 sm:h-12 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           
-          <span className="text-white/60 font-bold text-base">×</span>
+          {/* Dấu × nhỏ gọn ở giữa */}
+          <span className="text-white font-bold text-lg drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]">×</span>
           
-          {/* LOGO LEO SPAZE (Tăng size tương xứng) */}
-          <div className="w-24 h-12 sm:w-32 sm:h-16 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center" />
+          {/* LOGO LEO SPAZE (Glow trắng xanh) */}
+          <div className="w-24 h-12 sm:w-28 sm:h-14 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           
         </div>
 
+        {/* Nút Admin giữ nguyên */}
         <button
           className="flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-white/50 text-xs font-medium hover:bg-white/10 transition-colors cursor-pointer"
           type="button"
