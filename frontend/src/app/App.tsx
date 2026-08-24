@@ -224,10 +224,11 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         {isPlaying ? <Volume2 size={20} className="text-sky-400" /> : <VolumeX size={20} className="text-slate-400" />}
       </button>
 
-      {/* Header (Tăng chiều cao h-16 sm:h-20 để chứa logo to) */}
-      <header className="w-full h-16 sm:h-20 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
-        <div className="flex items-center gap-3 sm:gap-4"> 
+      {/* Header Thu Nhỏ Chiều Cao (h-12) */}
+      <header className="w-full h-12 sm:h-14 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
+        <div className="flex items-center gap-3"> {/* Tăng gap lên xíu cho thoáng */}
           
+          {/* LOGO URIWON (Đã được làm to lên) */}
           {/* LOGO URIWON (Đã tăng size to hẳn) */}
           <div className="w-24 h-10 sm:w-32 sm:h-14 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
           
@@ -239,11 +240,11 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
         </div>
 
         <button
-          className="flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 rounded-full border border-white/50 text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full border border-white/50 text-xs font-medium hover:bg-white/10 transition-colors cursor-pointer"
           type="button"
           onClick={onAdminLogin}
         >
-          <Lock className="w-3.5 h-3.5" />
+          <Lock className="w-3 h-3" />
           <span>Đăng nhập Admin</span>
         </button>
       </header>
