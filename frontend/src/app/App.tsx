@@ -226,10 +226,16 @@ function HomePage({ onAdminLogin }: { onAdminLogin: () => void }) {
 
       {/* Header Thu Nhỏ Chiều Cao (h-12) */}
       <header className="w-full h-12 sm:h-14 flex items-center justify-between px-4 sm:px-12 md:px-24 bg-black/40 backdrop-blur-md border-b border-white/10 z-20">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-5 sm:w-12 sm:h-6 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
-          <span className="text-white font-bold text-xs">×</span>
-          <div className="w-14 h-10 sm:w-16 sm:h-12 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center" />
+        <div className="flex items-center gap-3"> {/* Tăng gap lên xíu cho thoáng */}
+          
+          {/* LOGO URIWON (Đã được làm to lên) */}
+          <div className="w-16 h-8 sm:w-20 sm:h-10 bg-[url(/image-uriwon.png)] bg-contain bg-no-repeat bg-center" />
+          
+          <span className="text-white/60 font-bold text-sm">×</span>
+          
+          {/* LOGO LEO SPAZE */}
+          <div className="w-16 h-10 sm:w-20 sm:h-12 bg-[url(/image-leospaze-2.png)] bg-contain bg-no-repeat bg-center" />
+          
         </div>
 
         <button
